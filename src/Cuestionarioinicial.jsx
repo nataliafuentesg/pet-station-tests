@@ -1,10 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 
-/* ================== CONFIG ================== */
 const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbwtDmt31qfJITUxgBriD4QwxJ9vcDN7GL0MvqglRcZIGYUwraLgsNUMxRfYhzzO8ua9/exec";
 const REQUIRE_TOKEN = true;
 const REPORTE_EMAIL = "community.manager@petstationvet.com";
-/* ============================================ */
 
 const C = { paper: "#F4F6FB", surface: "#FFFFFF", ink: "#14213D", sub: "#586182", faint: "#9AA6BE", navy: "#152C77", blue: "#2563EB", blueDk: "#1E3A8A", soft: "#E7EEFB", line: "#E2E7F1" };
 const serif = { fontFamily: "'Newsreader', Georgia, serif" };
