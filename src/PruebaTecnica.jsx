@@ -44,7 +44,8 @@ const sans = { fontFamily: "'Inter', system-ui, sans-serif" };
 export default function App() {
   useFonts();
   const [step, setStep] = useState("intro");
-  const [name, setName] = useState(""); const [email, setEmail] = useState(""); const [cargo, setCargo] = useState("Consulta Externa");
+  const [name, setName] = useState(""); const [email, setEmail] = useState("");
+  const cargo = "Consulta Externa";
   const [calc, setCalc] = useState({}); const [mcq, setMcq] = useState({}); const [open, setOpen] = useState({});
   const [sent, setSent] = useState("idle");
 
@@ -79,9 +80,6 @@ export default function App() {
         <div className="mt-7 grid gap-3">
           <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Tu nombre" className="w-full rounded-xl px-4 py-3 outline-none" style={inputStyle} />
           <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Tu correo" className="w-full rounded-xl px-4 py-3 outline-none" style={inputStyle} />
-          <select value={cargo} onChange={(e) => setCargo(e.target.value)} className="w-full rounded-xl px-4 py-3 outline-none" style={inputStyle}>
-            <option>Consulta Externa</option><option>Director Médico</option>
-          </select>
         </div>
         <button onClick={() => setStep("test")} className="mt-6 w-full rounded-xl py-3.5 font-medium" style={{ background: C.blue, color: "#fff", fontSize: 16 }}>Comenzar la prueba</button>
       </div>

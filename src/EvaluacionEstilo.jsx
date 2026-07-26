@@ -49,10 +49,7 @@ const SECTIONS = [
 ];
 const TOTAL = SECTIONS.reduce((n, s) => n + s.items.length, 0);
 
-const FIT = {
-  "Consulta Externa": { cognitivo: 3.5, orden: 2.5, personas: 2.0, presion: 2.5, iniciativa: 4.0 },
-  "Director Médico": { cognitivo: 2.5, orden: 2.5, personas: 4.0, presion: 3.0, iniciativa: 2.5 },
-};
+// (solo se contrata para Consulta Externa por ahora)
 
 function useFonts() {
   useEffect(() => {
@@ -100,12 +97,7 @@ export default function App() {
     return out || "Perfil equilibrado en las cinco dimensiones.";
   }, [results]);
 
-  const fit = useMemo(() => {
-    const means = results.reduce((o, r) => { o[r.id] = r.mean; return o; }, {});
-    const score = (t) => Object.keys(t).reduce((a, k) => a + Math.abs(means[k] - t[k]), 0);
-    const ce = score(FIT["Consulta Externa"]), dm = score(FIT["Director Médico"]);
-    return { best: ce <= dm ? "Consulta Externa" : "Director Médico", ce, dm };
-  }, [results]);
+  const fit = { best: "Consulta Externa" };
 
   const strengths = results.filter((r) => r.ln.strength).map((r) => r.ln.strength).slice(0, 4);
   const watches = results.filter((r) => r.ln.watch).map((r) => r.ln.watch).slice(0, 3);
@@ -113,8 +105,8 @@ export default function App() {
   const payload = useMemo(() => ({
     tipo: "perfil", fecha: new Date().toISOString(), nombre: name, email,
     dimensiones: results.reduce((o, r) => { o[r.id] = { media: +r.mean.toFixed(2), tendencia: r.ln.label }; return o; }, {}),
-    resumen: summary, encajeSugerido: fit.best, respuestas: ans,
-  }), [name, email, results, summary, fit, ans]);
+    resumen: summary, respuestas: ans,
+  }), [name, email, results, summary, ans]);
 
   const sec = SECTIONS[si];
   const secDone = sec?.items.every((_, i) => ans[`${sec.id}-${i}`]);
@@ -186,61 +178,28 @@ export default function App() {
         )}
 
         {step === "results" && (
-          <div className="grid gap-5">
-            <div className="rounded-3xl p-8" style={card}>
-              <span className="text-xs uppercase" style={{ color: C.faint, letterSpacing: "0.16em" }}>Perfil de estilo de trabajo</span>
-              <h1 className="mt-1" style={{ ...serif, fontSize: 34, fontWeight: 500, color: C.navy }}>{name || "Tu perfil"}</h1>
-              <p className="mt-3" style={{ ...serif, fontSize: 19, lineHeight: 1.55, fontStyle: "italic" }}>{summary}</p>
-              <div className="mt-5 inline-flex items-center gap-2 rounded-full px-4 py-2" style={{ background: C.soft }}>
-                <span className="text-xs" style={{ color: C.sub }}>Encaje orientativo:</span>
-                <span className="text-sm font-semibold" style={{ color: C.navy }}>{fit.best}</span>
-              </div>
-            </div>
-
-            <div className="rounded-3xl p-7" style={card}>
-              <h2 className="mb-5" style={{ ...serif, fontSize: 22, fontWeight: 500, color: C.navy }}>Dónde te ubicas</h2>
-              <div className="grid gap-6">
-                {results.map((r) => {
-                  const pct = ((r.mean - 1) / 6) * 100;
-                  return (
-                    <div key={r.id}>
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-xs" style={{ color: C.sub, width: 140 }}>{r.s.left}</span>
-                        <span className="text-xs text-right" style={{ color: C.sub, width: 140 }}>{r.s.right}</span>
-                      </div>
-                      <div className="relative w-full rounded-full" style={{ height: 8, background: C.soft }}>
-                        <div className="absolute rounded-full transition-all duration-500" style={{ top: -4, height: 16, width: 16, left: `${pct}%`, transform: "translateX(-50%)", background: C.blue, border: "3px solid #fff", boxShadow: `0 2px 8px ${C.blue}55` }} />
-                      </div>
-                      <p className="mt-2 text-xs" style={{ color: C.sub, lineHeight: 1.5 }}>{r.ln.interp}</p>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div className="grid gap-5">
-              <div className="rounded-3xl p-6" style={card}>
-                <h3 className="mb-3" style={{ ...serif, fontSize: 18, fontWeight: 600, color: C.navy }}>Fortalezas probables</h3>
-                {strengths.map((s, i) => <p key={i} className="text-sm mb-2" style={{ color: C.ink }}>· {s}</p>)}
-              </div>
-              <div className="rounded-3xl p-6" style={card}>
-                <h3 className="mb-3" style={{ ...serif, fontSize: 18, fontWeight: 600, color: C.navy }}>A explorar en la entrevista</h3>
-                {watches.map((w, i) => <p key={i} className="text-sm mb-2" style={{ color: C.ink }}>· {w}</p>)}
-              </div>
-            </div>
-
-            <div className="rounded-3xl p-6" style={{ background: C.soft, border: `1px solid ${C.line}` }}>
-              <p className="text-sm" style={{ color: C.ink, lineHeight: 1.6 }}><strong>Cómo se lee:</strong> es un retrato descriptivo, no un puntaje. Complementa la entrevista y la evaluación clínica; no descarta por sí solo.</p>
-            </div>
-
-            <div className="rounded-3xl p-6 flex items-center justify-between flex-wrap gap-3" style={card}>
-              {sent === "ok"
-                ? <span className="text-sm font-medium" style={{ color: C.blueDk }}>✓ ¡Listo! Recibimos tus respuestas.</span>
-                : <button onClick={submit} className="rounded-xl px-6 py-3 font-medium" style={{ background: C.blue, color: "#fff" }}>{sent === "sending" ? "Enviando…" : "Enviar mis respuestas"}</button>}
-              {sent === "err" && <span className="text-sm" style={{ color: "#B54708" }}>No se pudo enviar. Reintenta.</span>}
-            </div>
+          <div className="rounded-3xl p-10 text-center" style={card}>
+            {sent === "ok" ? (
+              <>
+                <div className="mx-auto rounded-full flex items-center justify-center" style={{ width: 56, height: 56, background: C.soft }}>
+                  <span style={{ color: C.blue, fontSize: 28 }}>✓</span>
+                </div>
+                <h1 className="mt-5" style={{ ...serif, fontSize: 30, fontWeight: 500, color: C.navy }}>¡Gracias, {name || "por participar"}!</h1>
+                <p className="mt-3" style={{ color: C.sub, fontSize: 16, lineHeight: 1.6 }}>Recibimos tus respuestas. Seguimos con los siguientes pasos del proceso y te contactaremos pronto.</p>
+              </>
+            ) : (
+              <>
+                <h1 style={{ ...serif, fontSize: 30, fontWeight: 500, color: C.navy }}>Ya casi terminas</h1>
+                <p className="mt-3 mb-6" style={{ color: C.sub, fontSize: 16, lineHeight: 1.6 }}>Envía tus respuestas para completar la evaluación.</p>
+                <button onClick={submit} className="rounded-xl px-8 py-3 font-medium" style={{ background: C.blue, color: "#fff", fontSize: 16 }}>
+                  {sent === "sending" ? "Enviando…" : "Enviar mis respuestas"}
+                </button>
+                {sent === "err" && <p className="mt-4 text-sm" style={{ color: "#B54708" }}>No se pudo enviar. Reintenta.</p>}
+              </>
+            )}
           </div>
         )}
+
         <p className="text-center text-xs mt-8" style={{ color: C.faint }}>Autoevaluación de referencia · uso interno de selección</p>
       </div>
     </div>
