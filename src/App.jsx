@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
 import EvaluacionEstilo from "./EvaluacionEstilo";
 import PruebaTecnica from "./PruebaTecnica";
+import CuestionarioInicial from "./CuestionarioInicial";
 
 const C = {
   paper: "#F4F6FB", surface: "#FFFFFF", ink: "#14213D", sub: "#586182",
@@ -40,6 +41,17 @@ function IconClinic() {
   );
 }
 
+function IconForm() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+      <rect x="5" y="3" width="14" height="18" rx="2" stroke={C.blue} strokeWidth="2" />
+      <line x1="8" y1="8" x2="16" y2="8" stroke={C.navy} strokeWidth="2" strokeLinecap="round" />
+      <line x1="8" y1="12" x2="16" y2="12" stroke={C.blue} strokeWidth="2" strokeLinecap="round" />
+      <line x1="8" y1="16" x2="13" y2="16" stroke={C.blue} strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 function TestCard({ to, icon, kicker, title, desc }) {
   return (
     <Link to={to} className="block rounded-3xl p-7 transition-all duration-200 hover:shadow-lg"
@@ -73,6 +85,9 @@ function Landing() {
         </p>
 
         <div className="grid gap-5 mt-9" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))" }}>
+          <TestCard to="/inicial" icon={<IconForm />} kicker="~2 min"
+            title="Cuestionario de postulación"
+            desc="Unas preguntas breves para iniciar tu proceso con nosotros." />
           <TestCard to="/estilo" icon={<IconSpectrum />} kicker="15 preguntas · ~5 min"
             title="Evaluación de estilo de trabajo"
             desc="Te ubicas entre distintas formas de trabajar y al final ves tu perfil. No hay respuestas correctas." />
@@ -93,6 +108,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <Routes>
+        <Route path="/inicial" element={<CuestionarioInicial />} />
         <Route path="/estilo" element={<EvaluacionEstilo />} />
         <Route path="/tecnica" element={<PruebaTecnica />} />
         <Route path="*" element={<Landing />} />
