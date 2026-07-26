@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 
 /* ================== CONFIG ================== */
-const WEBAPP_URL = "https://script.google.com/macros/s/PEGA_TU_ID/exec";
+const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbwtDmt31qfJITUxgBriD4QwxJ9vcDN7GL0MvqglRcZIGYUwraLgsNUMxRfYhzzO8ua9/exec";
 const REQUIRE_TOKEN = true;
 const REPORTE_EMAIL = "community.manager@petstationvet.com";
 /* ============================================ */
