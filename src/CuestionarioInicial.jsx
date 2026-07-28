@@ -9,7 +9,7 @@ const REPORTE_EMAIL = "community.manager@petstationvet.com";
 const C = { paper: "#F4F6FB", surface: "#FFFFFF", ink: "#14213D", sub: "#586182", faint: "#9AA6BE", navy: "#152C77", blue: "#2563EB", blueDk: "#1E3A8A", soft: "#E7EEFB", line: "#E2E7F1" };
 const serif = { fontFamily: "'Newsreader', Georgia, serif" };
 const sans = { fontFamily: "'Inter', system-ui, sans-serif" };
-const COMODIDAD = ["Consulta general", "Hospitalización", "Asistencia en cirugía", "Urgencias", "Cirugía", "Consulta especializada", "Laboratorio", "Imágenes Diagnósticas"];
+const COMODIDAD = ["Consulta general", "Hospitalización", "Urgencias", "Cirugía", "Consulta especializada", "Laboratorio", "Imágenes Diagnósticas"];
 
 const qp = (k) => { try { return new URLSearchParams(window.location.search).get(k) || ""; } catch (e) { return ""; } };
 const ls = (k) => { try { return window.localStorage.getItem(k); } catch (e) { return null; } };
