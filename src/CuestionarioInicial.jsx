@@ -93,7 +93,7 @@ export default function App() {
         <Choice value={f.tarjeta} options={["Sí", "No"]} onPick={(v) => set("tarjeta", v)} />
       </Q>
       <Q label="Escribe tu número de tarjeta profesional">
-        <input value={f.aniosExp} onChange={(e) => set("tarPro", e.target.value)} placeholder="Ej: 00000" inputMode="decimal" className="rounded-xl px-4 py-2.5 outline-none" style={{ ...input, width: 160 }} />
+        <input value={f.aniosExp} onChange={(e) => set("tarPro", e.target.value)} placeholder="Ej: 00000" className="rounded-xl px-4 py-2.5 outline-none" style={{ ...input, width: 160 }} />
       </Q>
       <Q label="¿Cuántos años de experiencia tienes en pequeños animales?">
         <input value={f.aniosExp} onChange={(e) => set("aniosExp", e.target.value)} placeholder="Ej: 3" inputMode="decimal" className="rounded-xl px-4 py-2.5 outline-none" style={{ ...input, width: 160 }} />
