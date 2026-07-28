@@ -56,14 +56,14 @@ export default function App() {
 
   const set = (k, v) => setF((s) => ({ ...s, [k]: v }));
   const toggleCom = (c) => setF((s) => ({ ...s, comodidad: s.comodidad.includes(c) ? s.comodidad.filter((x) => x !== c) : [...s.comodidad, c] }));
-  const complete = f.tarjeta && f.aniosExp && f.disponible && f.ubicacion.trim() && f.salario.trim() && f.inicio.trim();
+  const complete = f.tarjeta && f.tarProf && f.aniosExp && f.disponible && f.ubicacion.trim() && f.salario.trim() && f.inicio.trim();
 
   async function submit() {
     if (sentRef.current !== "idle" || !complete) return;
     sentRef.current = "sending"; setSent("sending");
     const payload = {
       tipo: "inicial", token, fecha: new Date().toISOString(), nombre: name, email,
-      tarjeta: f.tarjeta, aniosExp: f.aniosExp, disponibleFinde: f.disponible,
+      tarjeta: f.tarjeta, tarProf: f.tarProf, aniosExp: f.aniosExp, disponibleFinde: f.disponible,
       ubicacion: f.ubicacion, salario: f.salario, inicio: f.inicio, comodidad: f.comodidad,
     };
     try { await fetch(WEBAPP_URL, { method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(payload) }); } catch (e) {}
