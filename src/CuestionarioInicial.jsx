@@ -39,7 +39,7 @@ export default function App() {
   const [reason, setReason] = useState("");
   const [token, setToken] = useState("");
   const [name, setName] = useState(""); const [email, setEmail] = useState("");
-  const [f, setF] = useState({ tarjeta: "", aniosExp: "", disponible: "", ubicacion: "", salario: "", inicio: "", comodidad: [] });
+  const [f, setF] = useState({ tarjeta: "", tarProf:"", aniosExp: "", disponible: "", ubicacion: "", salario: "", inicio: "", comodidad: [] });
   const [sent, setSent] = useState("idle");
   const sentRef = useRef("idle");
   const doneKey = `done-inicial-${token || "test"}`;
@@ -92,10 +92,13 @@ export default function App() {
       <Q label="¿Tienes tarjeta profesional vigente?">
         <Choice value={f.tarjeta} options={["Sí", "No"]} onPick={(v) => set("tarjeta", v)} />
       </Q>
+      <Q label="Escribe tu número de tarjeta profesional">
+        <input value={f.aniosExp} onChange={(e) => set("tarPro", e.target.value)} placeholder="Ej: 00000" inputMode="decimal" className="rounded-xl px-4 py-2.5 outline-none" style={{ ...input, width: 160 }} />
+      </Q>
       <Q label="¿Cuántos años de experiencia tienes en pequeños animales?">
         <input value={f.aniosExp} onChange={(e) => set("aniosExp", e.target.value)} placeholder="Ej: 3" inputMode="decimal" className="rounded-xl px-4 py-2.5 outline-none" style={{ ...input, width: 160 }} />
       </Q>
-      <Q label="¿Tienes disponibilidad para sábados y domingos programados?">
+      <Q label="¿Tienes disponibilidad para domingos programados?">
         <Choice value={f.disponible} options={["Sí", "No"]} onPick={(v) => set("disponible", v)} />
       </Q>
       <Q label="¿Desde dónde te desplazarías? (ciudad o barrio)">
