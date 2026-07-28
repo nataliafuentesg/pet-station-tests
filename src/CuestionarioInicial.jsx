@@ -9,7 +9,7 @@ const REPORTE_EMAIL = "community.manager@petstationvet.com";
 const C = { paper: "#F4F6FB", surface: "#FFFFFF", ink: "#14213D", sub: "#586182", faint: "#9AA6BE", navy: "#152C77", blue: "#2563EB", blueDk: "#1E3A8A", soft: "#E7EEFB", line: "#E2E7F1" };
 const serif = { fontFamily: "'Newsreader', Georgia, serif" };
 const sans = { fontFamily: "'Inter', system-ui, sans-serif" };
-const COMODIDAD = ["Consulta general", "Hospitalización", "Asistencia en cirugía", "Urgencias", "Cirugía", "Consulta especializada", "Laboratorio", "Imágenes Diagnosticas"];
+const COMODIDAD = ["Consulta general", "Hospitalización", "Asistencia en cirugía", "Urgencias", "Cirugía", "Consulta especializada", "Laboratorio", "Imágenes Diagnósticas"];
 
 const qp = (k) => { try { return new URLSearchParams(window.location.search).get(k) || ""; } catch (e) { return ""; } };
 const ls = (k) => { try { return window.localStorage.getItem(k); } catch (e) { return null; } };
@@ -39,7 +39,17 @@ export default function App() {
   const [reason, setReason] = useState("");
   const [token, setToken] = useState("");
   const [name, setName] = useState(""); const [email, setEmail] = useState("");
-  const [f, setF] = useState({ tarjeta: "", tarProf:"", aniosExp: "", disponible: "", ubicacion: "", salario: "", inicio: "", comodidad: [] });
+  const [f, setF] = useState({ 
+    tarjeta: "", 
+    tarProf: "", 
+    aniosExp: "", 
+    disponible: "", 
+    ubicacion: "", 
+    salario: "", 
+    sustentoSalario: "", // <-- NUEVO CAMPO
+    inicio: "", 
+    comodidad: [] 
+  });
   const [sent, setSent] = useState("idle");
   const sentRef = useRef("idle");
   const doneKey = `done-inicial-${token || "test"}`;
@@ -56,7 +66,9 @@ export default function App() {
 
   const set = (k, v) => setF((s) => ({ ...s, [k]: v }));
   const toggleCom = (c) => setF((s) => ({ ...s, comodidad: s.comodidad.includes(c) ? s.comodidad.filter((x) => x !== c) : [...s.comodidad, c] }));
-  const complete = f.tarjeta && f.tarProf && f.aniosExp && f.disponible && f.ubicacion.trim() && f.salario.trim() && f.inicio.trim();
+  
+  // Validación con el nuevo campo de sustento de aspiración salarial
+  const complete = f.tarjeta && f.tarProf.trim() && f.aniosExp.trim() && f.disponible && f.ubicacion.trim() && f.salario.trim() && f.sustentoSalario.trim() && f.inicio.trim();
 
   async function submit() {
     if (sentRef.current !== "idle" || !complete) return;
@@ -64,7 +76,7 @@ export default function App() {
     const payload = {
       tipo: "inicial", token, fecha: new Date().toISOString(), nombre: name, email,
       tarjeta: f.tarjeta, tarProf: f.tarProf, aniosExp: f.aniosExp, disponibleFinde: f.disponible,
-      ubicacion: f.ubicacion, salario: f.salario, inicio: f.inicio, comodidad: f.comodidad,
+      ubicacion: f.ubicacion, salario: f.salario, sustentoSalario: f.sustentoSalario, inicio: f.inicio, comodidad: f.comodidad,
     };
     try { await fetch(WEBAPP_URL, { method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(payload) }); } catch (e) {}
     lsSet(doneKey, "1"); sentRef.current = "ok"; setSent("ok"); setPhase("done");
@@ -87,13 +99,13 @@ export default function App() {
   return <Shell>
     <div className="rounded-3xl p-8" style={card}>
       <h1 style={{ ...serif, fontSize: 32, lineHeight: 1.1, fontWeight: 500, color: C.navy }}>Cuestionario de postulación{name ? `` : ""}</h1>
-      <p className="mt-3 mb-2" style={{ color: C.sub, fontSize: 16, lineHeight: 1.6 }}>{name ? `¡Hola, ${name}! ` : ""}Toma 2 minutos. Con esto iniciamos tu proceso.</p>
+      <p className="mt-3 mb-6" style={{ color: C.sub, fontSize: 16, lineHeight: 1.6 }}>{name ? `¡Hola, ${name}! ` : ""}Toma 2 minutos. Con esto iniciamos tu proceso.</p>
 
       <Q label="¿Tienes tarjeta profesional vigente?">
         <Choice value={f.tarjeta} options={["Sí", "No"]} onPick={(v) => set("tarjeta", v)} />
       </Q>
       <Q label="Escribe tu número de tarjeta profesional">
-        <input value={f.tarPro} onChange={(e) => set("tarPro", e.target.value)} placeholder="Ej: 00000" className="rounded-xl px-4 py-2.5 outline-none" style={{ ...input, width: 160 }} />
+        <input value={f.tarProf} onChange={(e) => set("tarProf", e.target.value)} placeholder="Ej: 00000" className="rounded-xl px-4 py-2.5 outline-none" style={{ ...input, width: 160 }} />
       </Q>
       <Q label="¿Cuántos años de experiencia tienes en pequeños animales?">
         <input value={f.aniosExp} onChange={(e) => set("aniosExp", e.target.value)} placeholder="Ej: 3" inputMode="decimal" className="rounded-xl px-4 py-2.5 outline-none" style={{ ...input, width: 160 }} />
@@ -107,6 +119,19 @@ export default function App() {
       <Q label="¿Cuál es tu expectativa salarial?">
         <input value={f.salario} onChange={(e) => set("salario", e.target.value)} placeholder="Ej: $2.500.000" className="w-full rounded-xl px-4 py-2.5 outline-none" style={input} />
       </Q>
+      
+      {/* NUEVO CAMPO: SUSTENTO DE LA EXPECTATIVA SALARIAL */}
+      <Q label="¿En qué basas tu expectativa salarial? (experiencia, competencias clave o valor que le aportarás a la clínica)">
+        <textarea 
+          value={f.sustentoSalario} 
+          onChange={(e) => set("sustentoSalario", e.target.value)} 
+          placeholder="Cuéntanos brevemente sobre tus habilidades, logros o experiencia que respaldan tu aspiración salarial..." 
+          rows={3} 
+          className="w-full rounded-xl px-4 py-2.5 outline-none resize-none" 
+          style={input} 
+        />
+      </Q>
+
       <Q label="¿En cuánto tiempo podrías empezar?">
         <input value={f.inicio} onChange={(e) => set("inicio", e.target.value)} placeholder="Ej: Inmediato / 15 días" className="w-full rounded-xl px-4 py-2.5 outline-none" style={input} />
       </Q>
