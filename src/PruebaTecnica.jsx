@@ -7,9 +7,9 @@ const DURACION_SEG = 45 * 60;    // 45 minutos
 const REPORTE_EMAIL = "community.manager@petstationvet.com";
 
 // URLs de los PDFs de Cuadro Hemático (Sustituye por las URLs reales alojadas en tu servidor o Cloudflare)
-const PDF_ATUN = "https://pet-station-tests.vercel.app/documents/ch-atun.pdf"; 
-const PDF_DANTE_CH = "https://pet-station-tests.vercel.app/documents/ch-dante.pdf";
-const PDF_DANTE_DIAGNOSTICO = "https://pet-station-tests.vercel.app/documents/dc-dante.pdf";
+const PDF_ATUN = "https://pet-station-tests.vercel.app/documentos/ch-atun.pdf"; 
+const PDF_DANTE_CH = "https://pet-station-tests.vercel.app/documentos/ch-dante.pdf";
+const PDF_DANTE_DIAGNOSTICO = "https://pet-station-tests.vercel.app/documentos/dc-dante.pdf";
 
 /* ============================================ */
 
