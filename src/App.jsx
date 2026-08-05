@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
 import EvaluacionEstilo from "./EvaluacionEstilo";
 import PruebaTecnica from "./PruebaTecnica";
 import CuestionarioInicial from "./CuestionarioInicial";
+import InformeCandidatas from "./InformeCandidatas";
 
 const C = {
   paper: "#F4F6FB", surface: "#FFFFFF", ink: "#14213D", sub: "#586182",
@@ -111,6 +112,7 @@ export default function App() {
         <Route path="/inicial" element={<CuestionarioInicial />} />
         <Route path="/estilo" element={<EvaluacionEstilo />} />
         <Route path="/tecnica" element={<PruebaTecnica />} />
+        <Route path="/informe" element={<InformeCandidatas />} />
         <Route path="*" element={<Landing />} />
       </Routes>
     </BrowserRouter>
