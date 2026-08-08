@@ -114,6 +114,29 @@ const CANDIDATAS = [
     },
     nota: "Mismo puntaje objetivo que Sonia, pero con el desarrollo más extenso y estructurado del grupo en casos clínicos y preguntas abiertas. Es quien pide el salario más alto ($4.000.000), consistente con sus 8 años de experiencia y el nivel de detalle mostrado.",
   },
+  {
+    nombre: "Ana Camila Lopez Copete",
+    fechas: { postulo: "5 ago 2026", estilo: "8 ago 2026", tecnica: "8 ago 2026" },
+    experiencia: "1 año", tarjeta: "58203", ubicacion: "Tabío (cuenta con moto)",
+    finde: "Disponible", inicio: "16 de agosto", salario: "$2.700.000",
+    flag: null,
+    dims: [
+      { label: "Análisis y método", labelR: "Agilidad y espontaneidad", pct: 27.8, fuerza: "leve", texto: "Análisis y método — leve" },
+      { label: "Orden y precisión", labelR: "Flexibilidad y practicidad", pct: 5.6, fuerza: "marcada", texto: "Marcada orden y precisión" },
+      { label: "Orientación a las personas", labelR: "Foco en la tarea", pct: 33.3, fuerza: "leve", texto: "Orientación a las personas — leve" },
+      { label: "Calma y estabilidad", labelR: "Intensidad y reactividad", pct: 11.2, fuerza: "marcada", texto: "Marcada calma y estabilidad" },
+      { label: "Iniciativa y proactividad", labelR: "Ejecución guiada", pct: 11.2, fuerza: "marcada", texto: "Marcada iniciativa y proactividad" },
+    ],
+    tecnica: {
+      puntaje: 13, total: 13, tiempo: "41 min de 45", envio: "manual",
+      sub: [["Cálculos", "4/4"], ["Farmacología", "5/5"], ["Gestión", "4/4"]],
+      casos: [
+        { titulo: "Caso Atún · diferenciales", texto: "Leucemia viral felina, hipoplasia medular, inmunodeficiencia viral felina. Prioriza transfusión de sangre entera fresca por el hematocrito muy bajo, antibiótico profiláctico por la neutropenia marcada, interferón y soporte nutricional (parenteral o sonda) si no come." },
+        { titulo: "Caso Dante · hallazgos", texto: "Relaciona la tos con compresión cardiaca (tos cardiogénica) y plantea adenocarcinoma de sacos anales y enfermedad renal crónica como diferenciales. Propone PAF, ecografía abdominal, Rx toracolumbar e interconsulta con neurología; manejo paliativo con analgesia articular, antiinflamatorio respiratorio, dieta renal y curación de la zona ulcerada." },
+      ],
+    },
+    nota: "Puntaje objetivo perfecto (41 de los 45 min disponibles) y el desarrollo clínico más específico del grupo — nombra fármacos y conductas concretas (transfusión, interferón, manejo paliativo dirigido). Es la candidata con menos experiencia (1 año) y la única que menciona explícitamente cómo resolvería el desplazamiento (\"cuento con moto\") pese a vivir más lejos, en Tabío.",
+  },
 ];
 
 /* ================== UI ================== */
@@ -169,11 +192,11 @@ export default function InformeCandidatas() {
         </p>
 
         <div className="flex flex-wrap gap-2.5 mb-10">
-          <Chip n="14" l="postulaciones recibidas" />
+          <Chip n="15" l="postulaciones recibidas" />
           <Arrow />
-          <Chip n="4" l="pasaron el filtro inicial" />
+          <Chip n="5" l="pasaron el filtro inicial" />
           <Arrow />
-          <Chip n="3" l="completaron la prueba técnica" />
+          <Chip n="4" l="completaron la prueba técnica" />
         </div>
 
         <SectionTitle>Vista comparativa</SectionTitle>
@@ -210,7 +233,7 @@ export default function InformeCandidatas() {
         </div>
 
         <p className="text-xs mt-10 leading-relaxed" style={{ color: C.faint }}>
-          Fuente: respuestas registradas en el proceso de selección (cuestionario de postulación, evaluación de estilo de trabajo y prueba técnica). De las 14 postulaciones recibidas, 10 se descartaron en el filtro inicial por falta de tarjeta profesional vigente o disponibilidad de fines de semana. Documento de uso interno — Pet Station Vet.
+          Fuente: respuestas registradas en el proceso de selección (cuestionario de postulación, evaluación de estilo de trabajo y prueba técnica). De las 15 postulaciones recibidas, 10 se descartaron en el filtro inicial por falta de tarjeta profesional vigente o disponibilidad de fines de semana. Documento de uso interno — Pet Station Vet.
         </p>
       </div>
     </div>
