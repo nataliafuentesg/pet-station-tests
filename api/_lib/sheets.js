@@ -9,17 +9,23 @@ import { google } from "googleapis";
  *
  * Variables de entorno requeridas (configúralas en Vercel, nunca en el repo):
  *   GOOGLE_SERVICE_ACCOUNT_EMAIL
- *   GOOGLE_PRIVATE_KEY        (el valor de "private_key" del JSON descargado)
+ *   GOOGLE_PRIVATE_KEY_B64    (el valor de "private_key" del JSON, codificado en base64 —
+ *                              así queda en una sola línea, inmune a que la UI de Vercel
+ *                              o el portapapeles dañen los saltos de línea al pegar)
  *   GOOGLE_SHEET_ID           (el ID del Sheet, entre /d/ y /edit en la URL)
  */
 
 let cachedSheets = null;
 
+export function decodePrivateKey() {
+  const b64 = (process.env.GOOGLE_PRIVATE_KEY_B64 || "").trim();
+  return Buffer.from(b64, "base64").toString("utf8");
+}
+
 export function getSheetsClient() {
   if (cachedSheets) return cachedSheets;
   const email = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
-  const rawKey = process.env.GOOGLE_PRIVATE_KEY || "";
-  const key = rawKey.replace(/\\n/g, "\n"); // Vercel guarda \n literal, hay que convertirlo
+  const key = decodePrivateKey();
   const auth = new google.auth.JWT(email, undefined, key, ["https://www.googleapis.com/auth/spreadsheets"]);
   cachedSheets = google.sheets({ version: "v4", auth });
   return cachedSheets;
