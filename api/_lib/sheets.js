@@ -26,7 +26,10 @@ export function getSheetsClient() {
   if (cachedSheets) return cachedSheets;
   const email = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
   const key = decodePrivateKey();
-  const auth = new google.auth.JWT(email, undefined, key, ["https://www.googleapis.com/auth/spreadsheets"]);
+  // OJO: la clase JWT de google-auth-library v11+ recibe un solo objeto de opciones,
+  // no argumentos posicionales — con posicionales construye un cliente sin credenciales
+  // y falla siempre con "unregistered callers", sin importar qué tan válida sea la llave.
+  const auth = new google.auth.JWT({ email, key, scopes: ["https://www.googleapis.com/auth/spreadsheets"] });
   cachedSheets = google.sheets({ version: "v4", auth });
   return cachedSheets;
 }
