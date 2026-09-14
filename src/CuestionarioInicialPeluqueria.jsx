@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 
 /* ================== CONFIG ================== */
-const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbwtDmt31qfJITUxgBriD4QwxJ9vcDN7GL0MvqglRcZIGYUwraLgsNUMxRfYhzzO8ua9/exec";
 const REQUIRE_TOKEN = true;
 const REPORTE_EMAIL = "community.manager@petstationvet.com";
 /* ============================================ */
@@ -14,16 +13,9 @@ const COMODIDAD = ["Baño y secado", "Corte por raza específica", "Deslanado", 
 const qp = (k) => { try { return new URLSearchParams(window.location.search).get(k) || ""; } catch (e) { return ""; } };
 const ls = (k) => { try { return window.localStorage.getItem(k); } catch (e) { return null; } };
 const lsSet = (k, v) => { try { window.localStorage.setItem(k, v); } catch (e) {} };
-function jsonp(url) {
-  return new Promise((res, rej) => {
-    const cb = "cb_" + Math.random().toString(36).slice(2);
-    const s = document.createElement("script");
-    window[cb] = (d) => { res(d); try { delete window[cb]; } catch (e) {} s.remove(); };
-    s.onerror = () => { rej(new Error("net")); s.remove(); };
-    s.src = url + (url.includes("?") ? "&" : "?") + "callback=" + cb;
-    document.body.appendChild(s);
-    setTimeout(() => { if (window[cb]) { try { delete window[cb]; } catch (e) {} s.remove(); rej(new Error("timeout")); } }, 20000);
-  });
+async function checkToken(token, tipo) {
+  const r = await fetch(`/api/check?token=${encodeURIComponent(token)}&tipo=${encodeURIComponent(tipo)}`);
+  return r.json();
 }
 function useFonts() {
   useEffect(() => {
@@ -59,7 +51,7 @@ export default function App() {
     if (ls(`done-inicial-peluqueria-${tk || "test"}`)) { setPhase("already"); return; }
     if (!REQUIRE_TOKEN) { setPhase("form"); return; }
     if (!tk) { setReason("sin_token"); setPhase("invalid"); return; }
-    jsonp(`${WEBAPP_URL}?action=check&token=${encodeURIComponent(tk)}&tipo=inicial`)
+    checkToken(tk, "inicial")
       .then((r) => { if (!r || !r.valid) { setReason(r ? r.reason : "error"); setPhase("invalid"); return; } setName(r.nombre || ""); setEmail(r.email || ""); setPhase("form"); })
       .catch(() => { setReason("error"); setPhase("invalid"); });
   }, []);
@@ -78,7 +70,7 @@ export default function App() {
       comodoLunesSabado: f.comodoTurnos, ubicacion: f.ubicacion, salario: f.salario, sustentoSalario: f.sustentoSalario,
       inicio: f.inicio, comodidad: f.comodidad,
     };
-    try { await fetch(WEBAPP_URL, { method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(payload) }); } catch (e) {}
+    try { await fetch("/api/submit", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) }); } catch (e) {}
     lsSet(doneKey, "1"); sentRef.current = "ok"; setSent("ok"); setPhase("done");
   }
 
