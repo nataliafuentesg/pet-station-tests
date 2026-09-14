@@ -13,6 +13,8 @@ export default function handler(req, res) {
     keyStartsRight: key.startsWith("-----BEGIN PRIVATE KEY-----"),
     keyHasEscapedNewlines: key.includes("\\n"),
     keyHasRealNewlines: key.includes("\n"),
+    keyFirstChars: key.slice(0, 8),
+    keyLastChars: key.slice(-8),
     hasSheetId: !!sheetId,
     sheetIdLength: sheetId.length,
   });
