@@ -43,7 +43,7 @@ export default function App() {
     experienciaPrevia: "",
     aniosExp: "",
     certificaciones: "",
-    disponible: "",
+    comodoTurnos: "",
     ubicacion: "",
     salario: "",
     sustentoSalario: "",
@@ -67,7 +67,7 @@ export default function App() {
   const set = (k, v) => setF((s) => ({ ...s, [k]: v }));
   const toggleCom = (c) => setF((s) => ({ ...s, comodidad: s.comodidad.includes(c) ? s.comodidad.filter((x) => x !== c) : [...s.comodidad, c] }));
 
-  const complete = f.experienciaPrevia && f.aniosExp.trim() && f.disponible && f.ubicacion.trim() && f.salario.trim() && f.sustentoSalario.trim() && f.inicio.trim();
+  const complete = f.experienciaPrevia && f.aniosExp.trim() && f.comodoTurnos && f.ubicacion.trim() && f.salario.trim() && f.sustentoSalario.trim() && f.inicio.trim();
 
   async function submit() {
     if (sentRef.current !== "idle" || !complete) return;
@@ -75,7 +75,7 @@ export default function App() {
     const payload = {
       tipo: "inicial", token, fecha: new Date().toISOString(), nombre: name, email,
       experienciaPrevia: f.experienciaPrevia, aniosExp: f.aniosExp, certificaciones: f.certificaciones,
-      disponibleFinde: f.disponible, ubicacion: f.ubicacion, salario: f.salario, sustentoSalario: f.sustentoSalario,
+      comodoLunesSabado: f.comodoTurnos, ubicacion: f.ubicacion, salario: f.salario, sustentoSalario: f.sustentoSalario,
       inicio: f.inicio, comodidad: f.comodidad,
     };
     try { await fetch(WEBAPP_URL, { method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(payload) }); } catch (e) {}
@@ -110,8 +110,8 @@ export default function App() {
       <Q label="¿Tienes algún curso o certificación en peluquería/grooming? (opcional)">
         <input value={f.certificaciones} onChange={(e) => set("certificaciones", e.target.value)} placeholder="Ej: Curso de grooming canino, 2023" className="w-full rounded-xl px-4 py-2.5 outline-none" style={input} />
       </Q>
-      <Q label="¿Tienes disponibilidad para sábados y domingos programados?">
-        <Choice value={f.disponible} options={["Sí", "No"]} onPick={(v) => set("disponible", v)} />
+      <Q label="La peluquería no abre domingos ni festivos, y el sábado es un día laboral normal con turnos que varían según la agenda. ¿Estás cómodo/a trabajando de lunes a sábado según los turnos que haya cada día?">
+        <Choice value={f.comodoTurnos} options={["Sí", "No"]} onPick={(v) => set("comodoTurnos", v)} />
       </Q>
       <Q label="¿Desde dónde te desplazarías? (ciudad o barrio)">
         <input value={f.ubicacion} onChange={(e) => set("ubicacion", e.target.value)} placeholder="Ej: Chía, Cajicá…" className="w-full rounded-xl px-4 py-2.5 outline-none" style={input} />

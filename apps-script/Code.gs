@@ -176,16 +176,16 @@ function guardarInicial(data) {
     const s = hoja("Postulaciones - Peluqueria", [
       "Fecha", "Nombre", "Email", "Token",
       "Experiencia previa en grooming", "Años de experiencia", "Certificaciones/cursos",
-      "Disponible sáb/dom", "Ubicación", "Expectativa salarial", "Justificación",
+      "Cómodo lunes a sábado (turnos)", "Ubicación", "Expectativa salarial", "Justificación",
       "Puede empezar", "Cómodo con", "Banderas"
     ]);
     const flags = [];
-    if (String(data.disponibleFinde) !== "Sí") flags.push("No disponible fin de semana");
+    if (String(data.comodoLunesSabado) !== "Sí") flags.push("No cómodo con turnos de lunes a sábado");
     if (String(data.experienciaPrevia) !== "Sí") flags.push("Sin experiencia previa en grooming");
     s.appendRow([
       data.fecha || new Date().toISOString(), data.nombre || "", data.email || "", data.token || "",
       data.experienciaPrevia || "", data.aniosExp || "", data.certificaciones || "",
-      data.disponibleFinde || "", data.ubicacion || "", data.salario || "", data.sustentoSalario || "",
+      data.comodoLunesSabado || "", data.ubicacion || "", data.salario || "", data.sustentoSalario || "",
       data.inicio || "", (data.comodidad || []).join(", "), flags.length ? flags.join(" · ") : "OK"
     ]);
     return;
