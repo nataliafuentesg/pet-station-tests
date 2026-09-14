@@ -4,6 +4,8 @@ import EvaluacionEstilo from "./EvaluacionEstilo";
 import PruebaTecnica from "./PruebaTecnica";
 import CuestionarioInicial from "./CuestionarioInicial";
 import InformeCandidatas from "./InformeCandidatas";
+import CuestionarioInicialPeluqueria from "./CuestionarioInicialPeluqueria";
+import PruebaTecnicaPeluqueria from "./PruebaTecnicaPeluqueria";
 
 const C = {
   paper: "#F4F6FB", surface: "#FFFFFF", ink: "#14213D", sub: "#586182",
@@ -113,6 +115,8 @@ export default function App() {
         <Route path="/estilo" element={<EvaluacionEstilo />} />
         <Route path="/tecnica" element={<PruebaTecnica />} />
         <Route path="/informe" element={<InformeCandidatas />} />
+        <Route path="/peluqueria-inicial" element={<CuestionarioInicialPeluqueria />} />
+        <Route path="/peluqueria-tecnica" element={<PruebaTecnicaPeluqueria />} />
         <Route path="*" element={<Landing />} />
       </Routes>
     </BrowserRouter>
