@@ -167,7 +167,8 @@ function crearToken(nombre, email, tipo, cargo) {
   else if (tipo === "inicial") ruta = esPeluqueria ? "/peluqueria-inicial" : "/inicial";
   else ruta = "/estilo"; // el test de estilo es el mismo para cualquier cargo
 
-  return FRONT_URL + ruta + "?token=" + token;
+  const base = FRONT_URL.replace(/\/+$/, ""); // sin "/" final, para no duplicarla con "ruta"
+  return base + ruta + "?token=" + token;
 }
 
 // ---------- GUARDAR RESULTADOS ----------
@@ -310,7 +311,7 @@ function crearEnlaceUI() {
   if (em.getSelectedButton() !== ui.Button.OK) return;
   const cg = ui.prompt("Generar enlace", "Cargo: veterinario / peluqueria", ui.ButtonSet.OK_CANCEL);
   if (cg.getSelectedButton() !== ui.Button.OK) return;
-  const tp = ui.prompt("Generar enlace", "Tipo: estilo / tecnica / ambas", ui.ButtonSet.OK_CANCEL);
+  const tp = ui.prompt("Generar enlace", "Tipo: inicial / estilo / tecnica / ambas (estilo+tecnica)", ui.ButtonSet.OK_CANCEL);
   if (tp.getSelectedButton() !== ui.Button.OK) return;
   const nombre = n.getResponseText().trim();
   const email = em.getResponseText().trim();
@@ -320,10 +321,10 @@ function crearEnlaceUI() {
   let msg = "";
   if (tipo === "ambas") {
     msg = "Estilo:\n" + crearToken(nombre, email, "estilo", cargo) + "\n\nTécnica:\n" + crearToken(nombre, email, "tecnica", cargo);
-  } else if (tipo === "estilo" || tipo === "tecnica") {
+  } else if (tipo === "estilo" || tipo === "tecnica" || tipo === "inicial") {
     msg = crearToken(nombre, email, tipo, cargo);
   } else {
-    ui.alert("Tipo no válido. Usa: estilo, tecnica o ambas."); return;
+    ui.alert("Tipo no válido. Usa: inicial, estilo, tecnica o ambas."); return;
   }
   ui.alert("Enlace(s) para " + nombre + " (" + cargo + "):\n\n" + msg + "\n\n(También quedaron en la hoja Tokens)");
 }

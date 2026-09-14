@@ -22,7 +22,7 @@ function jsonp(url) {
     s.onerror = () => { rej(new Error("net")); s.remove(); };
     s.src = url + (url.includes("?") ? "&" : "?") + "callback=" + cb;
     document.body.appendChild(s);
-    setTimeout(() => { if (window[cb]) { try { delete window[cb]; } catch (e) {} s.remove(); rej(new Error("timeout")); } }, 10000);
+    setTimeout(() => { if (window[cb]) { try { delete window[cb]; } catch (e) {} s.remove(); rej(new Error("timeout")); } }, 20000);
   });
 }
 function useFonts() {
