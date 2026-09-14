@@ -26,11 +26,11 @@ const sans = { fontFamily: "'Inter', system-ui, sans-serif" };
 
 /* ================== BANCO DE PREGUNTAS ================== */
 
-// SECCIÓN A: CÁLCULOS Y ORGANIZACIÓN PRÁCTICA
-const CALC = [
-    { id: "A1", q: "Necesitas preparar 500 mL de shampoo diluido en proporción 1:8 (1 parte de shampoo concentrado por 8 partes de agua). ¿Cuántos mL de shampoo concentrado usas? (aproxima a 1 decimal)", ans: 55.6, tol: 1 },
-    { id: "A2", q: "Tienes un turno de 4 horas (240 min). Ya programaste 3 perros de talla grande que toman 45 min cada uno. Si los perros de talla pequeña toman 25 min cada uno, ¿cuántos perros pequeños completos más te alcanzan a caber en el tiempo restante?", ans: 4, tol: 0 },
-    { id: "A3", q: "Un frasco de shampoo concentrado de 1 L se diluye en proporción 1:8 (1 parte de shampoo por 8 de agua). ¿Cuántos litros de shampoo listo para usar obtienes con el frasco completo?", ans: 9, tol: 0.3 },
+// SECCIÓN A: HERRAMIENTAS Y TÉCNICA DE CORTE
+const HERRAMIENTAS = [
+    { id: "A1", q: "¿Cuáles son las zonas de mayor riesgo de corte al peluquear un perro? ¿Qué herramienta usas para trabajar esas zonas con seguridad?" },
+    { id: "A2", q: "¿Qué herramientas usarías para los siguientes cortes? Indica el número de cuchilla y el tipo de tijera para cada caso:\nA) Poodle con pies y cara limpia, largo medio.\nB) Shih Tzu, corte cachorro y cara de oso.\nC) Golden Retriever con deslanado." },
+    { id: "A3", q: "¿Qué herramientas y técnica usarías para desenredar a un perro de manto largo (doble capa)? ¿Y para uno de una sola capa?" },
 ];
 
 // SECCIÓN B: HIGIENE, BIOSEGURIDAD Y MANEJO DE EQUIPO
@@ -39,6 +39,7 @@ const MCQ_HIGIENE = [
     { id: "B2", q: "Antes de recibir a una mascota para el servicio, ¿qué debes verificar?", opts: ["Solo el peso", "Que las vacunas y desparasitación estén al día y no haya signos de enfermedad", "Nada, eso se revisa después", "Solo el color del pelaje"], correct: 1 },
     { id: "B3", q: "¿Cómo debes usar la máquina de corte cerca de zonas sensibles (orejas, genitales, pliegues)?", opts: ["A máxima velocidad para terminar rápido", "Con precaución, cuchilla adecuada y sosteniendo firme pero suave la piel", "No es necesario tener cuidado especial ahí", "Solo con tijeras, nunca con máquina"], correct: 1 },
     { id: "B4", q: "Si te cortas o lastimas accidentalmente a una mascota durante el servicio, ¿qué haces primero?", opts: ["Terminas el servicio y avisas al final", "Detienes el servicio, atiendes la herida y avisas de inmediato al dueño y a tu líder", "No dices nada si es una herida pequeña", "Sigues cortando en otra zona para no perder tiempo"], correct: 1 },
+    { id: "B5", q: "Durante el baño notas que la piel de la mascota se enrojece, se irrita o reacciona al shampoo que estás usando. ¿Qué haces?", opts: ["Continúas con el mismo shampoo hasta terminar el servicio", "Enjuagas de inmediato, suspendes ese producto, evalúas usar un shampoo medicado/hipoalergénico si está indicado, e informas al dueño y/o remites a valoración veterinaria", "Le aplicas una crema por tu cuenta para calmar la irritación", "Sigues el baño normalmente si no se ve muy grave"], correct: 1 },
 ];
 
 // SECCIÓN C: COMPORTAMIENTO ANIMAL Y MANEJO DE SITUACIONES DIFÍCILES
@@ -73,9 +74,10 @@ const OPEN = [
     { id: "E2", q: "Notas que una mascota tiene parásitos visibles (pulgas/garrapatas) apenas la recibes. ¿Cómo se lo comunicas al dueño y qué haces antes de empezar el servicio?" },
     { id: "E3", q: "¿Cómo llevarías el control de insumos y del estado de las máquinas/tijeras para asegurar que siempre estén listas y en buen estado?" },
     { id: "E4", q: "Si estás en medio de una jornada con varias citas seguidas y atraviesas un imprevisto personal grave (una emergencia familiar), ¿cómo lo manejas frente a tus citas pendientes y el equipo?" },
+    { id: "E5", q: "¿Cuáles son las señales de estrés extremo en un perro o gato durante el servicio de peluquería, y qué medidas tomarías para poder terminar el trabajo de forma segura (o decidir no continuar)?" },
 ];
 
-const OBJ_TOTAL = CALC.length + MCQ_HIGIENE.length + MCQ_COMPORTAMIENTO.length;
+const OBJ_TOTAL = MCQ_HIGIENE.length + MCQ_COMPORTAMIENTO.length;
 
 /* ---- helpers ---- */
 const qp = (k) => { try { return new URLSearchParams(window.location.search).get(k) || ""; } catch (e) { return ""; } };
@@ -97,13 +99,14 @@ function useFonts() {
 
 export default function App() {
     useFonts();
-    const [phase, setPhase] = useState("loading"); // loading|invalid|already|intro|instructions|test|done|expired
+    const isPreview = qp("preview") === "1";
+    const [phase, setPhase] = useState(isPreview ? "preview" : "loading"); // loading|invalid|already|intro|instructions|test|done|expired|preview
     const [reason, setReason] = useState("");
     const [token, setToken] = useState("");
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
 
-    const [calc, setCalc] = useState({});
+    const [herramientas, setHerramientas] = useState({});
     const [higiene, setHigiene] = useState({});
     const [comportamiento, setComportamiento] = useState({});
     const [cases, setCases] = useState({});
@@ -118,15 +121,15 @@ export default function App() {
     const doneKey = `done-tecnica-peluqueria-${token || "test"}`;
 
     const score = useMemo(() => {
-        let s = 0; const dc = {}, dh = {}, dco = {};
-        CALC.forEach((c) => { const v = parseFloat(String(calc[c.id]).replace(",", ".")); const ok = !isNaN(v) && Math.abs(v - c.ans) <= c.tol; dc[c.id] = ok; if (ok) s++; });
+        let s = 0; const dh = {}, dco = {};
         MCQ_HIGIENE.forEach((m) => { const ok = higiene[m.id] === m.correct; dh[m.id] = ok; if (ok) s++; });
         MCQ_COMPORTAMIENTO.forEach((m) => { const ok = comportamiento[m.id] === m.correct; dco[m.id] = ok; if (ok) s++; });
-        return { s, dc, dh, dco };
-    }, [calc, higiene, comportamiento]);
+        return { s, dh, dco };
+    }, [higiene, comportamiento]);
 
     // ---- mount: token / attempt / resume ----
     useEffect(() => {
+        if (isPreview) return; // modo vista previa: no valida token ni llama al backend
         const tk = qp("token"); setToken(tk);
         const dk = `done-tecnica-peluqueria-${tk || "test"}`;
         if (ls(dk)) { setPhase("already"); return; }
@@ -170,19 +173,21 @@ export default function App() {
         const payload = {
             tipo: "tecnica", token, fecha: new Date().toISOString(), nombre: name, email,
             puntaje: score.s, total: OBJ_TOTAL,
-            detalleCalc: score.dc,
+            detalleCalc: {},
             detalleHigiene: score.dh,
             detalleComportamiento: score.dco,
             casos: CASES.reduce((o, c) => { o[c.id] = cases[c.id] || ""; return o; }, {}),
-            abiertas: OPEN.reduce((o, q) => { o[q.id] = open[q.id] || ""; return o; }, {}),
+            abiertas: {
+                ...HERRAMIENTAS.reduce((o, q) => { o[q.id] = herramientas[q.id] || ""; return o; }, {}),
+                ...OPEN.reduce((o, q) => { o[q.id] = open[q.id] || ""; return o; }, {}),
+            },
             tiempoSeg: tiempo, autoenviado: !!auto,
         };
         try { await fetch("/api/submit", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) }); } catch (e) { }
         lsSet(doneKey, "1"); sentRef.current = "ok"; setSent("ok"); setPhase("done");
     }
 
-    const objDone = CALC.every((c) => calc[c.id] !== undefined && calc[c.id] !== "") &&
-        MCQ_HIGIENE.every((m) => higiene[m.id] !== undefined) &&
+    const objDone = MCQ_HIGIENE.every((m) => higiene[m.id] !== undefined) &&
         MCQ_COMPORTAMIENTO.every((m) => comportamiento[m.id] !== undefined);
 
     const card = { background: C.surface, border: `1px solid ${C.line}`, boxShadow: "0 10px 40px rgba(20,33,61,0.06)" };
@@ -221,23 +226,36 @@ export default function App() {
         <div className="mt-5 grid gap-3">
             <Rule n="⏱" t={`Tienes ${DURACION_SEG / 60} minutos. El tiempo corre desde que inicias y se auto-envía al finalizar.`} />
             <Rule n="①" t="Es un solo intento. No recargues ni cierres la página durante el proceso." />
-            <Rule n="📋" t="Evaluamos: cálculos y organización práctica, higiene y manejo de equipo, comportamiento animal, casos reales y servicio al cliente." />
+            <Rule n="📋" t="Evaluamos: herramientas y técnica de corte, higiene y manejo de equipo, comportamiento animal, casos reales y servicio al cliente." />
             <Rule n="⚠" t={`Si presentas fallas técnicas, escríbenos a ${REPORTE_EMAIL} para habilitar tu intento.`} />
         </div>
         <button onClick={beginTest} className="mt-6 w-full rounded-xl py-3.5 font-medium cursor-pointer" style={{ background: C.blue, color: "#fff", fontSize: 16 }}>Entendido, comenzar prueba</button>
     </div></Shell>;
 
-    // ---- TEST SCREEN ----
+    // ---- PREVIEW / TEST SCREEN (comparten el mismo cuerpo de preguntas) ----
+    const previewBanner = isPreview && (
+        <div className="rounded-2xl px-5 py-4 mb-6 flex items-center gap-3" style={{ background: C.warnBg, border: `1px solid ${C.warn}` }}>
+            <span style={{ fontSize: 18 }}>👀</span>
+            <div>
+                <p className="text-sm font-semibold" style={{ color: C.warn }}>Modo vista previa — solo para revisión</p>
+                <p className="text-xs mt-0.5" style={{ color: C.warn }}>Nadie puede responder ni enviar nada desde este enlace. Es únicamente para aprobar el contenido de las preguntas.</p>
+            </div>
+        </div>
+    );
+
+    const disabledStyle = isPreview ? { opacity: 0.55, pointerEvents: "none" } : {};
     const low = remaining <= 180;
-    return <Shell timer={<div className="rounded-full px-4 py-1.5 text-sm font-semibold sticky top-4 z-50 shadow-sm" style={{ background: low ? C.warnBg : C.soft, color: low ? C.warn : C.blueDk }}>⏱ {mmss(remaining)}</div>}>
+
+    return <Shell timer={!isPreview && <div className="rounded-full px-4 py-1.5 text-sm font-semibold sticky top-4 z-50 shadow-sm" style={{ background: low ? C.warnBg : C.soft, color: low ? C.warn : C.blueDk }}>⏱ {mmss(remaining)}</div>}>
+        {previewBanner}
         <div className="grid gap-6">
 
             {/* SECCIÓN A */}
-            <Block card={card} title="Sección A · Cálculos y organización práctica" hint="Escribe el valor numérico solicitado.">
-                {CALC.map((c) => (
-                    <div key={c.id} className="mb-5">
-                        <p className="text-sm mb-2" style={{ color: C.ink }}><b>{c.id}.</b> {c.q}</p>
-                        <input value={calc[c.id] ?? ""} onChange={(e) => setCalc((s) => ({ ...s, [c.id]: e.target.value }))} placeholder="Tu respuesta" inputMode="decimal" className="rounded-xl px-4 py-2.5 outline-none" style={{ border: `1px solid ${C.line}`, width: 180 }} />
+            <Block card={card} title="Sección A · Herramientas y técnica de corte" hint="Responde con el mayor detalle posible.">
+                {HERRAMIENTAS.map((q) => (
+                    <div key={q.id} className="mb-5">
+                        <p className="text-sm mb-2" style={{ color: C.ink, whiteSpace: "pre-line" }}><b>{q.id}.</b> {q.q}</p>
+                        <textarea value={herramientas[q.id] ?? ""} onChange={(e) => setHerramientas((s) => ({ ...s, [q.id]: e.target.value }))} rows={3} disabled={isPreview} className="w-full rounded-xl px-4 py-3 outline-none resize-y" style={{ border: `1px solid ${C.line}`, ...sans, ...disabledStyle }} />
                     </div>
                 ))}
             </Block>
@@ -247,10 +265,10 @@ export default function App() {
                 {MCQ_HIGIENE.map((m) => (
                     <div key={m.id} className="mb-5">
                         <p className="text-sm mb-2" style={{ color: C.ink }}><b>{m.id}.</b> {m.q}</p>
-                        <div className="grid gap-2">
+                        <div className="grid gap-2" style={disabledStyle}>
                             {m.opts.map((o, idx) => {
                                 const chosen = higiene[m.id] === idx;
-                                return <button key={idx} onClick={() => setHigiene((s) => ({ ...s, [m.id]: idx }))} className="text-left rounded-xl px-4 py-2.5 text-sm transition-all cursor-pointer" style={{ border: `1.5px solid ${chosen ? C.blue : C.line}`, background: chosen ? C.soft : "#fff", color: C.ink }}>{o}</button>;
+                                return <button key={idx} disabled={isPreview} onClick={() => setHigiene((s) => ({ ...s, [m.id]: idx }))} className="text-left rounded-xl px-4 py-2.5 text-sm transition-all cursor-pointer" style={{ border: `1.5px solid ${chosen ? C.blue : C.line}`, background: chosen ? C.soft : "#fff", color: C.ink }}>{o}</button>;
                             })}
                         </div>
                     </div>
@@ -262,10 +280,10 @@ export default function App() {
                 {MCQ_COMPORTAMIENTO.map((m) => (
                     <div key={m.id} className="mb-5">
                         <p className="text-sm mb-2" style={{ color: C.ink }}><b>{m.id}.</b> {m.q}</p>
-                        <div className="grid gap-2">
+                        <div className="grid gap-2" style={disabledStyle}>
                             {m.opts.map((o, idx) => {
                                 const chosen = comportamiento[m.id] === idx;
-                                return <button key={idx} onClick={() => setComportamiento((s) => ({ ...s, [m.id]: idx }))} className="text-left rounded-xl px-4 py-2.5 text-sm transition-all cursor-pointer" style={{ border: `1.5px solid ${chosen ? C.blue : C.line}`, background: chosen ? C.soft : "#fff", color: C.ink }}>{o}</button>;
+                                return <button key={idx} disabled={isPreview} onClick={() => setComportamiento((s) => ({ ...s, [m.id]: idx }))} className="text-left rounded-xl px-4 py-2.5 text-sm transition-all cursor-pointer" style={{ border: `1.5px solid ${chosen ? C.blue : C.line}`, background: chosen ? C.soft : "#fff", color: C.ink }}>{o}</button>;
                             })}
                         </div>
                     </div>
@@ -287,9 +305,10 @@ export default function App() {
                             value={cases[c.id] ?? ""}
                             onChange={(e) => setCases((s) => ({ ...s, [c.id]: e.target.value }))}
                             rows={5}
+                            disabled={isPreview}
                             placeholder="Describe tu abordaje..."
                             className="w-full rounded-xl p-3.5 outline-none resize-y bg-white text-sm"
-                            style={{ border: `1px solid ${C.line}`, ...sans }}
+                            style={{ border: `1px solid ${C.line}`, ...sans, ...disabledStyle }}
                         />
                     </div>
                 ))}
@@ -300,16 +319,22 @@ export default function App() {
                 {OPEN.map((q) => (
                     <div key={q.id} className="mb-5">
                         <p className="text-sm mb-2" style={{ color: C.ink }}><b>{q.id}.</b> {q.q}</p>
-                        <textarea value={open[q.id] ?? ""} onChange={(e) => setOpen((s) => ({ ...s, [q.id]: e.target.value }))} rows={4} className="w-full rounded-xl px-4 py-3 outline-none resize-y" style={{ border: `1px solid ${C.line}`, ...sans }} />
+                        <textarea value={open[q.id] ?? ""} onChange={(e) => setOpen((s) => ({ ...s, [q.id]: e.target.value }))} rows={4} disabled={isPreview} className="w-full rounded-xl px-4 py-3 outline-none resize-y" style={{ border: `1px solid ${C.line}`, ...sans, ...disabledStyle }} />
                     </div>
                 ))}
             </Block>
 
             {/* BOTÓN DE ENVIAR */}
-            <div className="rounded-3xl p-6 flex items-center justify-between flex-wrap gap-3" style={card}>
-                <span className="text-sm" style={{ color: C.faint }}>{objDone ? "Secciones objetivas completas. ¡Listo para enviar!" : "Completa las opciones múltiples y cálculos para habilitar el envío."}</span>
-                <button disabled={!objDone || sent === "sending"} onClick={() => finish(false)} className="rounded-xl px-6 py-3 font-medium cursor-pointer transition-all" style={{ background: objDone ? C.blue : C.line, color: objDone ? "#fff" : C.faint, cursor: objDone ? "pointer" : "not-allowed" }}>{sent === "sending" ? "Enviando prueba…" : "Enviar prueba técnica"}</button>
-            </div>
+            {isPreview ? (
+                <div className="rounded-3xl p-6 text-center" style={card}>
+                    <span className="text-sm" style={{ color: C.faint }}>Vista previa de solo lectura — el envío está deshabilitado.</span>
+                </div>
+            ) : (
+                <div className="rounded-3xl p-6 flex items-center justify-between flex-wrap gap-3" style={card}>
+                    <span className="text-sm" style={{ color: C.faint }}>{objDone ? "Secciones objetivas completas. ¡Listo para enviar!" : "Completa las opciones múltiples para habilitar el envío."}</span>
+                    <button disabled={!objDone || sent === "sending"} onClick={() => finish(false)} className="rounded-xl px-6 py-3 font-medium cursor-pointer transition-all" style={{ background: objDone ? C.blue : C.line, color: objDone ? "#fff" : C.faint, cursor: objDone ? "pointer" : "not-allowed" }}>{sent === "sending" ? "Enviando prueba…" : "Enviar prueba técnica"}</button>
+                </div>
+            )}
 
         </div>
     </Shell>;

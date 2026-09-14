@@ -27,7 +27,8 @@ function useFonts() {
 
 export default function App() {
   useFonts();
-  const [phase, setPhase] = useState("loading"); // loading|invalid|already|form|done
+  const isPreview = qp("preview") === "1";
+  const [phase, setPhase] = useState(isPreview ? "form" : "loading"); // loading|invalid|already|form|done
   const [reason, setReason] = useState("");
   const [token, setToken] = useState("");
   const [name, setName] = useState(""); const [email, setEmail] = useState("");
@@ -47,6 +48,7 @@ export default function App() {
   const doneKey = `done-inicial-peluqueria-${token || "test"}`;
 
   useEffect(() => {
+    if (isPreview) return; // modo vista previa: no valida token ni llama al backend
     const tk = qp("token"); setToken(tk);
     if (ls(`done-inicial-peluqueria-${tk || "test"}`)) { setPhase("already"); return; }
     if (!REQUIRE_TOKEN) { setPhase("form"); return; }
@@ -88,55 +90,74 @@ export default function App() {
     <p className="mt-3" style={{ color: C.sub, fontSize: 16, lineHeight: 1.6 }}>Recibimos tu postulación. Revisaremos tus respuestas y te contactaremos con los siguientes pasos del proceso.</p>
   </div></Shell>;
 
+  const disabledStyle = isPreview ? { opacity: 0.55, pointerEvents: "none" } : {};
+
   return <Shell>
+    {isPreview && (
+      <div className="rounded-2xl px-5 py-4 mb-6 flex items-center gap-3" style={{ background: "#FEF0E7", border: "1px solid #B54708" }}>
+        <span style={{ fontSize: 18 }}>👀</span>
+        <div>
+          <p className="text-sm font-semibold" style={{ color: "#B54708" }}>Modo vista previa — solo para revisión</p>
+          <p className="text-xs mt-0.5" style={{ color: "#B54708" }}>Nadie puede responder ni enviar nada desde este enlace. Es únicamente para aprobar el contenido de las preguntas.</p>
+        </div>
+      </div>
+    )}
     <div className="rounded-3xl p-8" style={card}>
       <h1 style={{ ...serif, fontSize: 32, lineHeight: 1.1, fontWeight: 500, color: C.navy }}>Cuestionario de postulación</h1>
       <p className="mt-3 mb-6" style={{ color: C.sub, fontSize: 16, lineHeight: 1.6 }}>{name ? `¡Hola, ${name}! ` : ""}Toma 2 minutos. Con esto iniciamos tu proceso.</p>
 
-      <Q label="¿Tienes experiencia previa en peluquería canina y/o felina?">
-        <Choice value={f.experienciaPrevia} options={["Sí", "No"]} onPick={(v) => set("experienciaPrevia", v)} />
-      </Q>
-      <Q label="¿Cuántos años de experiencia tienes en grooming de mascotas?">
-        <input value={f.aniosExp} onChange={(e) => set("aniosExp", e.target.value)} placeholder="Ej: 3" inputMode="decimal" className="rounded-xl px-4 py-2.5 outline-none" style={{ ...input, width: 160 }} />
-      </Q>
-      <Q label="¿Tienes algún curso o certificación en peluquería/grooming? (opcional)">
-        <input value={f.certificaciones} onChange={(e) => set("certificaciones", e.target.value)} placeholder="Ej: Curso de grooming canino, 2023" className="w-full rounded-xl px-4 py-2.5 outline-none" style={input} />
-      </Q>
-      <Q label="¿Tienes disponibilidad para trabajar de lunes a sábado, cumpliendo el horario o turno que te asignen?">
-        <Choice value={f.comodoTurnos} options={["Sí", "No"]} onPick={(v) => set("comodoTurnos", v)} />
-      </Q>
-      <Q label="¿Desde dónde te desplazarías? (ciudad o barrio)">
-        <input value={f.ubicacion} onChange={(e) => set("ubicacion", e.target.value)} placeholder="Ej: Chía, Cajicá…" className="w-full rounded-xl px-4 py-2.5 outline-none" style={input} />
-      </Q>
-      <Q label="¿Cuál es tu expectativa salarial?">
-        <input value={f.salario} onChange={(e) => set("salario", e.target.value)} placeholder="Ej: $2.000.000" className="w-full rounded-xl px-4 py-2.5 outline-none" style={input} />
-      </Q>
-      <Q label="¿En qué basas tu expectativa salarial? (experiencia, competencias clave o valor que le aportarás)">
-        <textarea
-          value={f.sustentoSalario}
-          onChange={(e) => set("sustentoSalario", e.target.value)}
-          placeholder="Cuéntanos brevemente sobre tus habilidades, logros o experiencia que respaldan tu aspiración salarial..."
-          rows={3}
-          className="w-full rounded-xl px-4 py-2.5 outline-none resize-none"
-          style={input}
-        />
-      </Q>
-      <Q label="¿En cuánto tiempo podrías empezar?">
-        <input value={f.inicio} onChange={(e) => set("inicio", e.target.value)} placeholder="Ej: Inmediato / 15 días" className="w-full rounded-xl px-4 py-2.5 outline-none" style={input} />
-      </Q>
-      <Q label="¿Con qué te sientes cómodo/a? (elige las que apliquen)" last>
-        <div className="flex flex-wrap gap-2">
-          {COMODIDAD.map((c) => {
-            const on = f.comodidad.includes(c);
-            return <button key={c} onClick={() => toggleCom(c)} className="rounded-full px-4 py-2 text-sm transition-all" style={{ border: `1.5px solid ${on ? C.blue : C.line}`, background: on ? C.soft : "#fff", color: on ? C.blueDk : C.sub, fontWeight: on ? 600 : 400 }}>{c}</button>;
-          })}
-        </div>
-      </Q>
+      <div style={disabledStyle}>
+        <Q label="¿Tienes experiencia previa en peluquería canina y/o felina?">
+          <Choice value={f.experienciaPrevia} options={["Sí", "No"]} onPick={(v) => set("experienciaPrevia", v)} />
+        </Q>
+        <Q label="¿Cuántos años de experiencia tienes en grooming de mascotas?">
+          <input value={f.aniosExp} onChange={(e) => set("aniosExp", e.target.value)} placeholder="Ej: 3" inputMode="decimal" className="rounded-xl px-4 py-2.5 outline-none" style={{ ...input, width: 160 }} />
+        </Q>
+        <Q label="¿Tienes algún curso o certificación en peluquería/grooming? (opcional)">
+          <input value={f.certificaciones} onChange={(e) => set("certificaciones", e.target.value)} placeholder="Ej: Curso de grooming canino, 2023" className="w-full rounded-xl px-4 py-2.5 outline-none" style={input} />
+        </Q>
+        <Q label="¿Tienes disponibilidad para trabajar de lunes a sábado, cumpliendo el horario o turno que te asignen?">
+          <Choice value={f.comodoTurnos} options={["Sí", "No"]} onPick={(v) => set("comodoTurnos", v)} />
+        </Q>
+        <Q label="¿Desde dónde te desplazarías? (ciudad o barrio)">
+          <input value={f.ubicacion} onChange={(e) => set("ubicacion", e.target.value)} placeholder="Ej: Chía, Cajicá…" className="w-full rounded-xl px-4 py-2.5 outline-none" style={input} />
+        </Q>
+        <Q label="¿Cuál es tu expectativa salarial?">
+          <input value={f.salario} onChange={(e) => set("salario", e.target.value)} placeholder="Ej: $2.000.000" className="w-full rounded-xl px-4 py-2.5 outline-none" style={input} />
+        </Q>
+        <Q label="¿En qué basas tu expectativa salarial? (experiencia, competencias clave o valor que le aportarás)">
+          <textarea
+            value={f.sustentoSalario}
+            onChange={(e) => set("sustentoSalario", e.target.value)}
+            placeholder="Cuéntanos brevemente sobre tus habilidades, logros o experiencia que respaldan tu aspiración salarial..."
+            rows={3}
+            className="w-full rounded-xl px-4 py-2.5 outline-none resize-none"
+            style={input}
+          />
+        </Q>
+        <Q label="¿En cuánto tiempo podrías empezar?">
+          <input value={f.inicio} onChange={(e) => set("inicio", e.target.value)} placeholder="Ej: Inmediato / 15 días" className="w-full rounded-xl px-4 py-2.5 outline-none" style={input} />
+        </Q>
+        <Q label="¿Con qué te sientes cómodo/a? (elige las que apliquen)" last>
+          <div className="flex flex-wrap gap-2">
+            {COMODIDAD.map((c) => {
+              const on = f.comodidad.includes(c);
+              return <button key={c} onClick={() => toggleCom(c)} className="rounded-full px-4 py-2 text-sm transition-all" style={{ border: `1.5px solid ${on ? C.blue : C.line}`, background: on ? C.soft : "#fff", color: on ? C.blueDk : C.sub, fontWeight: on ? 600 : 400 }}>{c}</button>;
+            })}
+          </div>
+        </Q>
+      </div>
 
-      <button disabled={!complete || sent === "sending"} onClick={submit} className="mt-2 w-full rounded-xl py-3.5 font-medium" style={{ background: complete ? C.blue : C.line, color: complete ? "#fff" : C.faint, fontSize: 16, cursor: complete ? "pointer" : "not-allowed" }}>
-        {sent === "sending" ? "Enviando…" : "Enviar postulación"}
-      </button>
-      {!complete && <p className="mt-3 text-xs text-center" style={{ color: C.faint }}>Completa todas las preguntas para enviar.</p>}
+      {isPreview ? (
+        <p className="mt-2 text-sm text-center" style={{ color: C.faint }}>Vista previa de solo lectura — el envío está deshabilitado.</p>
+      ) : (
+        <>
+          <button disabled={!complete || sent === "sending"} onClick={submit} className="mt-2 w-full rounded-xl py-3.5 font-medium" style={{ background: complete ? C.blue : C.line, color: complete ? "#fff" : C.faint, fontSize: 16, cursor: complete ? "pointer" : "not-allowed" }}>
+            {sent === "sending" ? "Enviando…" : "Enviar postulación"}
+          </button>
+          {!complete && <p className="mt-3 text-xs text-center" style={{ color: C.faint }}>Completa todas las preguntas para enviar.</p>}
+        </>
+      )}
     </div>
   </Shell>;
 }
