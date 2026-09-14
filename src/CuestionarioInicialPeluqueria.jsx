@@ -110,7 +110,7 @@ export default function App() {
       <Q label="¿Tienes algún curso o certificación en peluquería/grooming? (opcional)">
         <input value={f.certificaciones} onChange={(e) => set("certificaciones", e.target.value)} placeholder="Ej: Curso de grooming canino, 2023" className="w-full rounded-xl px-4 py-2.5 outline-none" style={input} />
       </Q>
-      <Q label="La peluquería no abre domingos ni festivos, y el sábado es un día laboral normal con turnos que varían según la agenda. ¿Estás cómodo/a trabajando de lunes a sábado según los turnos que haya cada día?">
+      <Q label="¿Tienes disponibilidad para trabajar de lunes a sábado, cumpliendo el horario o turno que te asignen?">
         <Choice value={f.comodoTurnos} options={["Sí", "No"]} onPick={(v) => set("comodoTurnos", v)} />
       </Q>
       <Q label="¿Desde dónde te desplazarías? (ciudad o barrio)">
