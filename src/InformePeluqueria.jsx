@@ -151,18 +151,18 @@ export default function InformePeluqueria() {
                 <tbody>
                   {state.candidatos.map((c) => {
                     const tec = c.tecnica;
-                    const puntaje = tec ? Number(tec["Puntaje objetivo"]) : null;
-                    const total = tec ? Number(tec["Total"]) : null;
-                    const banderas = c.inicial?.["Banderas"] || "";
+                    const puntaje = tec ? Number(tec.puntaje) : null;
+                    const total = tec ? Number(tec.total) : null;
+                    const banderas = c.inicial?.banderas || "";
                     return (
                       <tr key={c.nombre}>
                         <td className="px-4 py-3 font-semibold" style={{ borderBottom: `1px solid ${C.line}` }}>{c.nombre}</td>
-                        <td className="px-4 py-3" style={{ ...mono, borderBottom: `1px solid ${C.line}` }}>{c.inicial?.["Años de experiencia"] || "—"}</td>
-                        <td className="px-4 py-3" style={{ borderBottom: `1px solid ${C.line}` }}>{c.inicial?.["Ubicación"] || "—"}</td>
-                        <td className="px-4 py-3" style={{ ...mono, borderBottom: `1px solid ${C.line}` }}>{c.inicial?.["Expectativa salarial"] || "—"}</td>
-                        <td className="px-4 py-3" style={{ borderBottom: `1px solid ${C.line}` }}>{c.inicial?.["Cómodo lunes a sábado (turnos)"] || "—"}</td>
+                        <td className="px-4 py-3" style={{ ...mono, borderBottom: `1px solid ${C.line}` }}>{c.inicial?.aniosExp || "—"}</td>
+                        <td className="px-4 py-3" style={{ borderBottom: `1px solid ${C.line}` }}>{c.inicial?.ubicacion || "—"}</td>
+                        <td className="px-4 py-3" style={{ ...mono, borderBottom: `1px solid ${C.line}` }}>{c.inicial?.salario || "—"}</td>
+                        <td className="px-4 py-3" style={{ borderBottom: `1px solid ${C.line}` }}>{c.inicial?.comodoLunesSabado || "—"}</td>
                         <td className="px-4 py-3" style={{ borderBottom: `1px solid ${C.line}` }}>
-                          {tec ? <ScorePill ok={puntaje === total}>{puntaje}/{total} · {tec["% Objetivo"]}%</ScorePill> : <ScorePill pending>Pendiente</ScorePill>}
+                          {tec ? <ScorePill ok={puntaje === total}>{puntaje}/{total} · {tec.pct}%</ScorePill> : <ScorePill pending>Pendiente</ScorePill>}
                         </td>
                         <td className="px-4 py-3" style={{ borderBottom: `1px solid ${C.line}` }}>{banderas && banderas !== "OK" ? <FlagPill>{banderas}</FlagPill> : "—"}</td>
                       </tr>
@@ -234,21 +234,21 @@ function DimBar({ label, labelR, media, tendencia }) {
 }
 
 const DIMENSIONES = [
-  { key: "Cognitivo", label: "Análisis y método", labelR: "Agilidad y espontaneidad" },
-  { key: "Orden", label: "Orden y precisión", labelR: "Flexibilidad y practicidad" },
-  { key: "Personas", label: "Orientación a las personas", labelR: "Foco en la tarea" },
-  { key: "Presión", label: "Calma y estabilidad", labelR: "Intensidad y reactividad" },
-  { key: "Iniciativa", label: "Iniciativa y proactividad", labelR: "Ejecución guiada" },
+  { key: "cognitivo", label: "Análisis y método", labelR: "Agilidad y espontaneidad" },
+  { key: "orden", label: "Orden y precisión", labelR: "Flexibilidad y practicidad" },
+  { key: "personas", label: "Orientación a las personas", labelR: "Foco en la tarea" },
+  { key: "presion", label: "Calma y estabilidad", labelR: "Intensidad y reactividad" },
+  { key: "iniciativa", label: "Iniciativa y proactividad", labelR: "Ejecución guiada" },
 ];
 
 function CandidateCard({ c }) {
-  const banderas = c.inicial?.["Banderas"] || "";
+  const banderas = c.inicial?.banderas || "";
   const hasFlag = banderas && banderas !== "OK";
   const tec = c.tecnica;
-  const higiene = tec ? countScore(parseJSONSafe(tec["Detalle higiene/equipo (JSON)"])) : null;
-  const comportamiento = tec ? countScore(parseJSONSafe(tec["Detalle comportamiento animal (JSON)"])) : null;
-  const casos = tec ? parseJSONSafe(tec["Casos (JSON)"]) : {};
-  const abiertas = tec ? parseJSONSafe(tec["Respuestas abiertas (JSON)"]) : {};
+  const higiene = tec ? countScore(parseJSONSafe(tec.detalleHigiene)) : null;
+  const comportamiento = tec ? countScore(parseJSONSafe(tec.detalleComportamiento)) : null;
+  const casos = tec ? parseJSONSafe(tec.casos) : {};
+  const abiertas = tec ? parseJSONSafe(tec.abiertas) : {};
   const herramientas = ["A1", "A2", "A3"].filter((id) => abiertas[id]);
 
   return (
@@ -257,7 +257,7 @@ function CandidateCard({ c }) {
         <div>
           <h3 style={{ ...serif, fontSize: 22, fontWeight: 500, color: C.navy }}>{c.nombre}</h3>
           <p className="text-xs mt-1" style={{ color: C.sub }}>
-            Postuló {fmtDate(c.inicial?.Fecha) || "—"} · Estilo {fmtDate(c.estilo?.Fecha) || "no presentada"} · Técnica {fmtDate(c.tecnica?.Fecha) || "no presentada"}
+            Postuló {fmtDate(c.inicial?.fecha) || "—"} · Estilo {fmtDate(c.estilo?.fecha) || "no presentada"} · Técnica {fmtDate(c.tecnica?.fecha) || "no presentada"}
           </p>
         </div>
         {hasFlag ? <FlagPill>{banderas}</FlagPill> : <ScorePill ok>Sin alertas</ScorePill>}
@@ -266,14 +266,14 @@ function CandidateCard({ c }) {
       <div className="p-6 grid gap-6">
         {c.inicial ? (
           <div className="grid gap-4 rounded-2xl p-4" style={{ background: C.paper, border: `1px solid ${C.line}`, gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))" }}>
-            <Fact k="Experiencia previa" v={c.inicial["Experiencia previa en grooming"]} />
-            <Fact k="Años de experiencia" v={c.inicial["Años de experiencia"]} />
-            <Fact k="Certificaciones" v={c.inicial["Certificaciones/cursos"] || "—"} />
-            <Fact k="Lunes a sábado" v={c.inicial["Cómodo lunes a sábado (turnos)"]} />
-            <Fact k="Ubicación" v={c.inicial["Ubicación"]} />
-            <Fact k="Puede empezar" v={c.inicial["Puede empezar"]} />
-            <Fact k="Expectativa salarial" v={c.inicial["Expectativa salarial"]} mono />
-            <Fact k="Cómodo con" v={c.inicial["Cómodo con"] || "—"} />
+            <Fact k="Experiencia previa" v={c.inicial.experienciaPrevia} />
+            <Fact k="Años de experiencia" v={c.inicial.aniosExp} />
+            <Fact k="Certificaciones" v={c.inicial.certificaciones || "—"} />
+            <Fact k="Lunes a sábado" v={c.inicial.comodoLunesSabado} />
+            <Fact k="Ubicación" v={c.inicial.ubicacion} />
+            <Fact k="Puede empezar" v={c.inicial.puedeEmpezar} />
+            <Fact k="Expectativa salarial" v={c.inicial.salario} mono />
+            <Fact k="Cómodo con" v={c.inicial.comodoCon || "—"} />
           </div>
         ) : (
           <Pending>Todavía no ha llenado el cuestionario inicial.</Pending>
@@ -283,7 +283,7 @@ function CandidateCard({ c }) {
           <div>
             <p className="text-xs font-bold uppercase mb-3" style={{ color: C.faint, letterSpacing: "0.07em" }}>Perfil de estilo de trabajo</p>
             {c.estilo ? DIMENSIONES.map((d) => (
-              <DimBar key={d.key} label={d.label} labelR={d.labelR} media={c.estilo[`${d.key} (media)`]} tendencia={c.estilo[`${d.key} (tendencia)`]} />
+              <DimBar key={d.key} label={d.label} labelR={d.labelR} media={c.estilo[d.key]?.media} tendencia={c.estilo[d.key]?.tendencia} />
             )) : <Pending>Todavía no ha presentado la evaluación de estilo.</Pending>}
           </div>
 
@@ -292,8 +292,8 @@ function CandidateCard({ c }) {
             {!tec ? <Pending>Todavía no ha presentado la prueba técnica.</Pending> : (
               <>
                 <div className="flex items-baseline gap-2 mb-3">
-                  <span style={{ ...mono, fontSize: 30, fontWeight: 700, color: Number(tec["Puntaje objetivo"]) === Number(tec["Total"]) ? C.good : C.bad }}>{tec["Puntaje objetivo"]}/{tec["Total"]}</span>
-                  <span className="text-xs" style={{ color: C.faint }}>{tec["% Objetivo"]}% · {mmss(tec["Tiempo (seg)"])} · {tec["Auto-enviado"] === "Sí" ? "auto-enviada" : "manual"}</span>
+                  <span style={{ ...mono, fontSize: 30, fontWeight: 700, color: Number(tec.puntaje) === Number(tec.total) ? C.good : C.bad }}>{tec.puntaje}/{tec.total}</span>
+                  <span className="text-xs" style={{ color: C.faint }}>{tec.pct}% · {mmss(tec.tiempoSeg)} · {tec.autoenviado === "Sí" ? "auto-enviada" : "manual"}</span>
                 </div>
                 <div className="grid grid-cols-2 gap-2 mb-3">
                   <div className="text-center rounded-lg px-2 py-2" style={{ background: C.paper, border: `1px solid ${C.line}` }}>

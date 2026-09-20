@@ -131,6 +131,27 @@ async function appendRow(sheets, spreadsheetId, sheetName, headers, values) {
 }
 
 /**
+ * Lee una hoja completa y devuelve solo las filas de datos (sin encabezado),
+ * como arreglos de valores por POSICIÓN. Se usa para hojas donde alguien
+ * pudo haber renombrado/reordenado manualmente los encabezados en el Sheet
+ * (ej. "Perfiles", compartida entre veterinario y peluquería) — así la
+ * lectura no depende del texto de la fila 1, solo del orden real con que
+ * el código siempre escribe (guardarInicial/guardarPerfil/guardarTecnica).
+ * Si la hoja aún no existe, devuelve un arreglo vacío en vez de fallar.
+ */
+export async function readRowsPositional(sheets, spreadsheetId, sheetName) {
+  let res;
+  try {
+    res = await sheets.spreadsheets.values.get({ spreadsheetId, range: sheetName });
+  } catch (err) {
+    if (String(err).includes("Unable to parse range")) return [];
+    throw err;
+  }
+  const rows = res.data.values || [];
+  return rows.length < 2 ? [] : rows.slice(1);
+}
+
+/**
  * Lee una hoja completa y la devuelve como arreglo de objetos, usando la
  * primera fila como nombres de columna. Si la hoja aún no existe (nadie ha
  * enviado esa prueba todavía), devuelve un arreglo vacío en vez de fallar.
