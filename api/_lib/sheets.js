@@ -130,6 +130,29 @@ async function appendRow(sheets, spreadsheetId, sheetName, headers, values) {
   });
 }
 
+/**
+ * Lee una hoja completa y la devuelve como arreglo de objetos, usando la
+ * primera fila como nombres de columna. Si la hoja aún no existe (nadie ha
+ * enviado esa prueba todavía), devuelve un arreglo vacío en vez de fallar.
+ */
+export async function readSheetAsObjects(sheets, spreadsheetId, sheetName) {
+  let res;
+  try {
+    res = await sheets.spreadsheets.values.get({ spreadsheetId, range: sheetName });
+  } catch (err) {
+    if (String(err).includes("Unable to parse range")) return [];
+    throw err;
+  }
+  const rows = res.data.values || [];
+  if (rows.length < 2) return [];
+  const headers = rows[0];
+  return rows.slice(1).map((row) => {
+    const obj = {};
+    headers.forEach((h, i) => { obj[h] = row[i] !== undefined ? row[i] : ""; });
+    return obj;
+  });
+}
+
 /* ---------- GUARDAR RESULTADOS (mismas hojas/columnas que el Apps Script) ---------- */
 
 export async function guardarInicial(sheets, spreadsheetId, data) {
