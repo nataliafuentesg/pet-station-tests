@@ -86,7 +86,7 @@ export default function InformePeluqueria() {
             <div className="rounded-full" style={{ width: 10, height: 10, background: C.blue }} />
             <span className="text-xs uppercase" style={{ color: C.faint, letterSpacing: "0.14em" }}>Acceso interno</span>
           </div>
-          <h1 style={{ ...serif, fontSize: 26, fontWeight: 500, color: C.navy }}>Candidatas — Peluquería</h1>
+          <h1 style={{ ...serif, fontSize: 26, fontWeight: 500, color: C.navy }}>Candidatos — Peluquería</h1>
           <p className="mt-2 mb-5 text-sm" style={{ color: C.sub }}>Ingresa la clave del equipo para ver el informe.</p>
           <input
             type="password" value={pw} autoFocus
@@ -117,13 +117,13 @@ export default function InformePeluqueria() {
           </button>
         </div>
 
-        <h1 style={{ ...serif, fontSize: 34, lineHeight: 1.1, fontWeight: 500, color: C.navy }}>Candidatas — Peluquero(a) Canino/Felino</h1>
+        <h1 style={{ ...serif, fontSize: 34, lineHeight: 1.1, fontWeight: 500, color: C.navy }}>Candidatos — Peluquero(a) Canino/Felino</h1>
         <p className="mt-3 mb-8 text-base" style={{ color: C.sub, maxWidth: 640, lineHeight: 1.6 }}>
           Este informe se alimenta directo del Sheet: en cuanto alguien completa el cuestionario inicial, el test de estilo o la prueba técnica, aparece o se actualiza aquí — solo dale a "Actualizar".
         </p>
 
         {state.status === "loading" && state.candidatos.length === 0 && (
-          <Center>Cargando candidatas…</Center>
+          <Center>Cargando candidatos…</Center>
         )}
 
         {state.status === "error" && (
@@ -133,7 +133,7 @@ export default function InformePeluqueria() {
         )}
 
         {state.status === "ready" && state.candidatos.length === 0 && (
-          <Center>Todavía no hay candidatas registradas para este cargo.</Center>
+          <Center>Todavía no hay candidatos registrados para este cargo.</Center>
         )}
 
         {state.candidatos.length > 0 && (
@@ -143,7 +143,7 @@ export default function InformePeluqueria() {
               <table className="w-full text-sm" style={{ minWidth: 640 }}>
                 <thead>
                   <tr style={{ background: C.paper }}>
-                    {["Candidata", "Experiencia", "Ubicación", "Expectativa salarial", "Lun-sáb", "Técnica", "Alertas"].map((h) => (
+                    {["Candidato", "Experiencia", "Ubicación", "Expectativa salarial", "Lun-sáb", "Técnica", "Alertas"].map((h) => (
                       <th key={h} className="text-left px-4 py-3" style={{ fontSize: 11, textTransform: "uppercase", letterSpacing: "0.06em", color: C.faint, fontWeight: 700, borderBottom: `1px solid ${C.line}` }}>{h}</th>
                     ))}
                   </tr>
