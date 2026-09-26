@@ -191,7 +191,12 @@ export default function InformePeluqueria() {
     const candidato = state.candidatos.find((c) => normalizeName(c.nombre) === normalizeName(printTarget));
     return (
       <div className="min-h-screen w-full py-10 px-4" style={{ background: C.paper, ...sans, color: C.ink }}>
-        <style>{`@media print { .no-print { display: none !important; } body { background: #fff !important; } .split-grid { grid-template-columns: 1fr !important; } }`}</style>
+        <style>{`@media print {
+          * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
+          .no-print { display: none !important; }
+          body { background: #fff !important; }
+          .split-grid { grid-template-columns: 1fr !important; }
+        }`}</style>
         <div className="mx-auto" style={{ maxWidth: 720 }}>
           <div className="no-print flex items-center justify-between mb-6">
             <a href="/informe-peluqueria" className="text-xs font-semibold" style={{ color: C.blueDk }}>← Volver al informe completo</a>
