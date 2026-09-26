@@ -191,7 +191,7 @@ export default function InformePeluqueria() {
     const candidato = state.candidatos.find((c) => normalizeName(c.nombre) === normalizeName(printTarget));
     return (
       <div className="min-h-screen w-full py-10 px-4" style={{ background: C.paper, ...sans, color: C.ink }}>
-        <style>{`@media print { .no-print { display: none !important; } body { background: #fff !important; } }`}</style>
+        <style>{`@media print { .no-print { display: none !important; } body { background: #fff !important; } .split-grid { grid-template-columns: 1fr !important; } }`}</style>
         <div className="mx-auto" style={{ maxWidth: 720 }}>
           <div className="no-print flex items-center justify-between mb-6">
             <a href="/informe-peluqueria" className="text-xs font-semibold" style={{ color: C.blueDk }}>← Volver al informe completo</a>
@@ -399,7 +399,7 @@ function CandidateCard({ c }) {
           <Pending>Todavía no ha llenado el cuestionario inicial.</Pending>
         )}
 
-        <div className="grid gap-6" style={{ gridTemplateColumns: "1.15fr 0.85fr" }}>
+        <div className="grid gap-6 split-grid" style={{ gridTemplateColumns: "1.15fr 0.85fr" }}>
           <div>
             <p className="text-xs font-bold uppercase mb-3" style={{ color: C.faint, letterSpacing: "0.07em" }}>Perfil de estilo de trabajo</p>
             {c.estilo ? (
