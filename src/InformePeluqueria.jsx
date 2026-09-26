@@ -50,9 +50,93 @@ function parseJSONSafe(s) { try { return JSON.parse(s || "{}"); } catch (e) { re
 function countScore(obj) { const vals = Object.values(obj); const ok = vals.filter((v) => v === true).length; return { ok, total: vals.length }; }
 function mmss(totalSec) { const s = Number(totalSec) || 0; const m = Math.floor(s / 60), r = Math.round(s % 60); return `${m} min${r ? ` ${r}s` : ""}`; }
 function fmtDate(iso) { if (!iso) return ""; try { return new Date(iso).toLocaleDateString("es-CO", { day: "numeric", month: "short", year: "numeric" }); } catch (e) { return iso; } }
+const qp = (k) => { try { return new URLSearchParams(window.location.search).get(k) || ""; } catch (e) { return ""; } };
+const normalizeName = (n) => String(n || "").trim().toLowerCase().replace(/\s+/g, " ");
+
+/* ---------- interpretación automática del perfil de estilo de trabajo ---------- */
+const FRASES = {
+  cognitivo: {
+    marcada_izq: "analiza cada situación con calma y método antes de actuar",
+    leve_izq: "tiende a pensar las cosas antes de actuar, sin perder practicidad",
+    neutral: "combina el análisis metódico con la capacidad de reaccionar rápido cuando la situación lo exige",
+    leve_der: "se inclina levemente hacia la agilidad y la improvisación práctica",
+    marcada_der: "reacciona rápido y se adapta sobre la marcha, más que seguir un proceso fijo",
+  },
+  orden: {
+    marcada_izq: "es muy meticuloso(a) con el orden, la limpieza y la precisión en cada detalle del trabajo",
+    leve_izq: "cuida el orden y la precisión sin perder de vista lo práctico",
+    neutral: "equilibra seguir procesos establecidos con la flexibilidad para adaptarse cuando algo no sale como estaba previsto",
+    leve_der: "prioriza la practicidad, ajustando el proceso cuando lo considera necesario",
+    marcada_der: "prefiere la flexibilidad y la solución práctica sobre seguir un protocolo estricto",
+  },
+  personas: {
+    marcada_izq: "pone en primer lugar el trato cercano con el cliente y su mascota",
+    leve_izq: "se inclina hacia el trato cercano con los dueños y las mascotas",
+    neutral: "equilibra la atención al cliente con el enfoque en completar bien la tarea técnica",
+    leve_der: "tiende a concentrarse más en la tarea técnica que en la interacción social",
+    marcada_der: "se enfoca principalmente en la tarea, con menos énfasis en la interacción social",
+  },
+  presion: {
+    marcada_izq: "se mantiene muy tranquilo(a) y estable incluso en momentos de tensión",
+    leve_izq: "tiende a mantener la calma bajo presión",
+    neutral: "mantiene un balance entre la calma y la reactividad ante situaciones de estrés",
+    leve_der: "puede mostrarse algo más reactivo(a) en momentos de presión",
+    marcada_der: "tiende a reaccionar con intensidad bajo presión",
+  },
+  iniciativa: {
+    marcada_izq: "toma la iniciativa con autonomía y no espera instrucciones para actuar",
+    leve_izq: "muestra disposición a proponer ideas y actuar con autonomía",
+    neutral: "combina la proactividad con la disposición a seguir instrucciones cuando se requiere",
+    leve_der: "prefiere seguir instrucciones claras antes que tomar la iniciativa por su cuenta",
+    marcada_der: "prefiere que le indiquen qué hacer, más que proponer o decidir por su cuenta",
+  },
+};
+
+function bucketFor(media) {
+  const m = parseFloat(String(media).replace(",", "."));
+  if (isNaN(m)) return null;
+  const d = m - 4;
+  if (d <= -1.6) return "marcada_izq";
+  if (d <= -0.7) return "leve_izq";
+  if (d < 0.7) return "neutral";
+  if (d < 1.6) return "leve_der";
+  return "marcada_der";
+}
+
+function interpretarEstilo(estilo) {
+  if (!estilo) return null;
+  const b = {};
+  DIMENSIONES.forEach((d) => { b[d.key] = bucketFor(estilo[d.key]?.media); });
+  if (Object.values(b).every((v) => !v)) return null;
+
+  const frase = (key) => (b[key] ? FRASES[key][b[key]] : null);
+  const partes = [];
+
+  const cog = frase("cognitivo"), ord = frase("orden");
+  if (cog && ord) partes.push(`Frente a cómo piensa y organiza el trabajo, ${cog}, y ${ord}.`);
+  else if (cog) partes.push(`Frente a cómo piensa y organiza el trabajo, ${cog}.`);
+  else if (ord) partes.push(`En la ejecución del trabajo, ${ord}.`);
+
+  const per = frase("personas");
+  if (per) partes.push(`En el trato con los dueños y las mascotas, ${per}.`);
+
+  const pre = frase("presion"), ini = frase("iniciativa");
+  if (pre && ini) partes.push(`Bajo presión, ${pre}, y en cuanto a la iniciativa, ${ini}.`);
+  else if (pre) partes.push(`Bajo presión, ${pre}.`);
+  else if (ini) partes.push(`En cuanto a la iniciativa, ${ini}.`);
+
+  if (b.presion === "marcada_izq" || b.presion === "leve_izq") {
+    partes.push("Esta estabilidad bajo presión es un punto a favor para el manejo de mascotas ansiosas o agresivas durante el servicio.");
+  } else if (b.presion === "marcada_der") {
+    partes.push("Vale la pena explorar en la entrevista cómo maneja el estrés frente a mascotas difíciles, dado que tiende a reaccionar con más intensidad bajo presión.");
+  }
+
+  return partes.join(" ");
+}
 
 export default function InformePeluqueria() {
   useFonts();
+  const printTarget = qp("candidato");
   const [unlocked, setUnlocked] = useState(false);
   const [pw, setPw] = useState("");
   const [err, setErr] = useState(false);
@@ -98,6 +182,31 @@ export default function InformePeluqueria() {
           />
           {err && <p className="text-xs mb-3" style={{ color: C.bad }}>Clave incorrecta.</p>}
           <button onClick={tryUnlock} className="w-full rounded-xl py-3 font-medium cursor-pointer" style={{ background: C.blue, color: "#fff", fontSize: 15 }}>Entrar</button>
+        </div>
+      </div>
+    );
+  }
+
+  if (printTarget) {
+    const candidato = state.candidatos.find((c) => normalizeName(c.nombre) === normalizeName(printTarget));
+    return (
+      <div className="min-h-screen w-full py-10 px-4" style={{ background: C.paper, ...sans, color: C.ink }}>
+        <style>{`@media print { .no-print { display: none !important; } body { background: #fff !important; } }`}</style>
+        <div className="mx-auto" style={{ maxWidth: 720 }}>
+          <div className="no-print flex items-center justify-between mb-6">
+            <a href="/informe-peluqueria" className="text-xs font-semibold" style={{ color: C.blueDk }}>← Volver al informe completo</a>
+            <button onClick={() => window.print()} className="text-xs font-semibold rounded-full px-4 py-2 cursor-pointer" style={{ background: C.blue, color: "#fff" }}>
+              🖨️ Imprimir / Guardar como PDF
+            </button>
+          </div>
+          <div className="flex items-center gap-2 mb-6">
+            <div className="rounded-full" style={{ width: 10, height: 10, background: C.blue }} />
+            <span className="text-xs uppercase" style={{ color: C.faint, letterSpacing: "0.14em" }}>Pet Station Vet · Ficha de candidato</span>
+          </div>
+          {state.status === "loading" && <Center>Cargando…</Center>}
+          {state.status === "error" && <Center>No pude cargar los datos: {state.error}</Center>}
+          {state.status === "ready" && !candidato && <Center>No encontré a "{printTarget}" en los datos actuales.</Center>}
+          {candidato && <CandidateCard c={candidato} />}
         </div>
       </div>
     );
@@ -245,6 +354,7 @@ function CandidateCard({ c }) {
   const banderas = c.inicial?.banderas || "";
   const hasFlag = banderas && banderas !== "OK";
   const tec = c.tecnica;
+  const interpretacion = interpretarEstilo(c.estilo);
   const higiene = tec ? countScore(parseJSONSafe(tec.detalleHigiene)) : null;
   const comportamiento = tec ? countScore(parseJSONSafe(tec.detalleComportamiento)) : null;
   const casos = tec ? parseJSONSafe(tec.casos) : {};
@@ -260,7 +370,17 @@ function CandidateCard({ c }) {
             Postuló {fmtDate(c.inicial?.fecha) || "—"} · Estilo {fmtDate(c.estilo?.fecha) || "no presentada"} · Técnica {fmtDate(c.tecnica?.fecha) || "no presentada"}
           </p>
         </div>
-        {hasFlag ? <FlagPill>{banderas}</FlagPill> : <ScorePill ok>Sin alertas</ScorePill>}
+        <div className="flex items-center gap-2 no-print">
+          {hasFlag ? <FlagPill>{banderas}</FlagPill> : <ScorePill ok>Sin alertas</ScorePill>}
+          <a
+            href={`?candidato=${encodeURIComponent(c.nombre)}`}
+            target="_blank" rel="noopener noreferrer"
+            className="text-xs font-semibold rounded-full px-3 py-1.5"
+            style={{ background: C.soft, color: C.blueDk, border: `1px solid ${C.line}`, textDecoration: "none" }}
+          >
+            📄 Descargar PDF
+          </a>
+        </div>
       </div>
 
       <div className="p-6 grid gap-6">
@@ -282,9 +402,18 @@ function CandidateCard({ c }) {
         <div className="grid gap-6" style={{ gridTemplateColumns: "1.15fr 0.85fr" }}>
           <div>
             <p className="text-xs font-bold uppercase mb-3" style={{ color: C.faint, letterSpacing: "0.07em" }}>Perfil de estilo de trabajo</p>
-            {c.estilo ? DIMENSIONES.map((d) => (
-              <DimBar key={d.key} label={d.label} labelR={d.labelR} media={c.estilo[d.key]?.media} tendencia={c.estilo[d.key]?.tendencia} />
-            )) : <Pending>Todavía no ha presentado la evaluación de estilo.</Pending>}
+            {c.estilo ? (
+              <>
+                {DIMENSIONES.map((d) => (
+                  <DimBar key={d.key} label={d.label} labelR={d.labelR} media={c.estilo[d.key]?.media} tendencia={c.estilo[d.key]?.tendencia} />
+                ))}
+                {interpretacion && (
+                  <div className="rounded-r-xl px-4 py-3 text-sm mt-4" style={{ background: C.paper, borderLeft: `3px solid ${C.blue}`, color: C.sub, lineHeight: 1.55 }}>
+                    <b style={{ color: C.ink }}>Interpretación:</b> {interpretacion}
+                  </div>
+                )}
+              </>
+            ) : <Pending>Todavía no ha presentado la evaluación de estilo.</Pending>}
           </div>
 
           <div>
