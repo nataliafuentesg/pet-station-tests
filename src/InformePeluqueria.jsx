@@ -462,6 +462,11 @@ function CandidateCard({ c }) {
                 ))}
               </>
             )}
+            {c.notaTecnica && (
+              <div className="rounded-r-xl px-4 py-3 text-sm mt-4" style={{ background: C.paper, borderLeft: `3px solid ${C.warn}`, color: C.sub, lineHeight: 1.55 }}>
+                <b style={{ color: C.ink }}>Nota técnica (análisis cualitativo):</b> {c.notaTecnica}
+              </div>
+            )}
           </div>
         </div>
       </div>

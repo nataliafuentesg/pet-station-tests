@@ -276,3 +276,37 @@ export async function guardarTecnica(sheets, spreadsheetId, data) {
   ];
   await appendRow(sheets, spreadsheetId, "Pruebas", headers, row);
 }
+
+/**
+ * Notas técnicas manuales (lectura cualitativa de las respuestas abiertas de
+ * la prueba técnica de peluquería) — no se generan solas como el resto,
+ * porque evaluar la calidad de una respuesta de texto libre no es algo que
+ * se pueda calcular con una fórmula. Se guardan aquí para que el informe las
+ * muestre sin tener que meterlas a mano en el código cada vez.
+ */
+const NOTAS_SHEET = "Notas - Peluqueria";
+const NOTAS_HEADERS = ["Nombre", "Nota técnica", "Fecha"];
+
+export async function guardarNotaTecnica(sheets, spreadsheetId, nombre, nota) {
+  await ensureSheet(sheets, spreadsheetId, NOTAS_SHEET, NOTAS_HEADERS);
+  const rows = await readRowsPositional(sheets, spreadsheetId, NOTAS_SHEET);
+  const key = (s) => String(s || "").trim().toLowerCase().replace(/\s+/g, " ");
+  const idx = rows.findIndex((r) => key(r[0]) === key(nombre));
+  const values = [nombre, nota, new Date().toISOString()];
+  if (idx === -1) {
+    await appendRow(sheets, spreadsheetId, NOTAS_SHEET, NOTAS_HEADERS, values);
+  } else {
+    const rowNum = idx + 2; // +1 encabezado, +1 base-1
+    await sheets.spreadsheets.values.update({
+      spreadsheetId, range: `${NOTAS_SHEET}!A${rowNum}:C${rowNum}`,
+      valueInputOption: "RAW", requestBody: { values: [values] },
+    });
+  }
+}
+
+export async function leerNotasTecnicas(sheets, spreadsheetId) {
+  const rows = await readRowsPositional(sheets, spreadsheetId, NOTAS_SHEET);
+  const map = new Map();
+  rows.forEach((r) => { if (r[0]) map.set(String(r[0]).trim().toLowerCase().replace(/\s+/g, " "), r[1] || ""); });
+  return map;
+}

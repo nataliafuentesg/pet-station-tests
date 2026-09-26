@@ -1,4 +1,4 @@
-import { getSheetsClient, sheetId, readRowsPositional } from "./_lib/sheets.js";
+import { getSheetsClient, sheetId, readRowsPositional, leerNotasTecnicas } from "./_lib/sheets.js";
 
 // Misma clave que usa el front (src/InformePeluqueria.jsx) para el acceso del equipo.
 // Cambia este valor si quieres rotar el acceso — no depende de ninguna cuenta real.
@@ -51,10 +51,11 @@ export default async function handler(req, res) {
     const sheets = getSheetsClient();
     const spreadsheetId = sheetId();
 
-    const [postulacionesRows, perfilesRows, pruebasRows] = await Promise.all([
+    const [postulacionesRows, perfilesRows, pruebasRows, notas] = await Promise.all([
       readRowsPositional(sheets, spreadsheetId, "Postulaciones - Peluqueria"),
       readRowsPositional(sheets, spreadsheetId, "Perfiles"),
       readRowsPositional(sheets, spreadsheetId, "Pruebas - Peluqueria"),
+      leerNotasTecnicas(sheets, spreadsheetId),
     ]);
 
     const postulaciones = postulacionesRows.map(mapInicial);
@@ -74,6 +75,8 @@ export default async function handler(req, res) {
     postulaciones.forEach((row) => { const b = bucket(row.nombre); if (b) b.inicial = row; });
     perfilesPeluqueria.forEach((row) => { const b = bucket(row.nombre); if (b) b.estilo = row; });
     pruebas.forEach((row) => { const b = bucket(row.nombre); if (b) b.tecnica = row; });
+
+    byName.forEach((c, key) => { c.notaTecnica = notas.get(key) || null; });
 
     // más recientes primero
     const candidatos = [...byName.values()].sort((a, b) => {
